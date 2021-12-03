@@ -21,7 +21,6 @@ func init() {
 	}
 	// 初始化MySQL
 	mysql.InitMysql()
-
 	//初始化redis
 	if err := redis.InitClient(); err != nil {
 		logger.Info("init redis fail err")

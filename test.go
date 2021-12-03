@@ -14,11 +14,10 @@ import (
 func Hex2Dec(val string) int {
 	n, err := strconv.ParseUint(val, 16, 64)
 	if err != nil {
-	fmt.Println(err)
-}
+		fmt.Println(err)
+	}
 	return int(n)
 }
-
 
 func main() {
 	hex := "00000000000000000000000000000000000000000000a2bc77ee287ecf500000"
@@ -47,4 +46,3 @@ func main() {
 //	}
 //
 //}
-
