@@ -122,16 +122,17 @@ func CreatPotionData() {
 
 // GetKeysByPfx 根据前缀遍历key 拼接数据
 func GetKeysByPfx(keypfx string) ([]model.Rdata, error) {
-	dataList, err := redis.GetKeysByPfx(keypfx) //dataList是一个key集合
+	pfx := fmt.Sprintf("%s:",keypfx)
+	dataList, err := redis.GetKeysByPfx(pfx) //dataList是一个key集合
+	logger.Info(dataList)
 	if err != nil {
 		logger.Error(err)
 		return nil, err
 	}
-	//logger.Info("dataList")
-	//logger.Info(dataList)
 	//使用map来存
 	var dataDetailMap []model.Rdata
 	for _, v := range dataList {
+		fmt.Println(v)
 		res, RErr := redis.GetDataByKey(v)
 		if RErr != nil {
 			logger.Error(RErr)
