@@ -8,10 +8,10 @@ package main
 
 import (
 	"fmt"
-	"go.uber.org/zap"
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
 	"redisData/logic"
+	"redisData/pkg/logger"
 	"redisData/setting"
 	"time"
 )
@@ -19,24 +19,19 @@ import (
 
 
 func main() {
-
 	//初始化viper
 	if err := setting.Init(""); err != nil {
-		zap.L().Error("viper init fail", zap.Error(err))
+		logger.Error(err)
 		return
 	}
-
 	//初始化MySQL
 	mysql.InitMysql()
-
 	//初始化redis
 	if err := redis.InitClient(); err != nil {
-		zap.L().Error("init redis fail err", zap.Error(err))
+		logger.Error(err)
 		return
 	}
 	defer redis.Close()
-
-
 	for{
 		//1.请求数据
 		pageSize := 300

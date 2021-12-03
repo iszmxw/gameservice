@@ -8,12 +8,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
-	"redisData/logger"
 	"redisData/logic"
+	"redisData/pkg/logger"
 	"redisData/setting"
 	"strconv"
 	"time"
@@ -22,37 +20,47 @@ import (
 func main() {
 	//初始化viper
 	if err := setting.Init(""); err != nil {
-		zap.L().Error("viper init fail", zap.Error(err))
+		logger.Error(err)
 		return
 	}
-	//初始化日志
-	if err := logger.InitLogger(viper.GetString("mode")); err != nil {
-		zap.L().Error("init logger fail err", zap.Error(err))
-		return
-	}
-	defer zap.L().Sync() //把缓冲区的日志添加
-	zap.L().Debug("init logger success")
 
 	//初始化MySQL
 	mysql.InitMysql()
 
 	//初始化redis
 	if err := redis.InitClient(); err != nil {
-		zap.L().Error("init redis fail err", zap.Error(err))
+		logger.Error(err)
 		return
 	}
 	defer redis.Close()
+	//获取10s前的市场价格
+	//获取30s前的市场价格
+	//获取60秒前的市场价格
+	//获取300秒前的市场价格 5m
+	//获取900秒的市场价格  15m
+	//获取1800秒的市场数据 30m
+	//获取3600秒市场数据 1h
+	//获取14400秒数据 4h
+	//获取86400秒数据 1D
+	//获取604800秒数据 1W
+	//获取2592000秒的数据 1Mon
 
 	for  {
-
+		dataOneMin := mysql.GetHistoryMarketData(60, "Metamon Egg")
+		if dataOneMin == nil{
+			logger.Info("mysql获取参数错误")
+			return
+		}
 		var safe,_ = redis.GetData("safe")
 		f, _ := strconv.ParseFloat(safe, 64)
+		//从mysql里面拿
 		fmt.Printf("安全监控设置百分比为%f\n",f)
 		//获取最新的市场数据,通过redis计算出来的
 		newMarketPrice := logic.GetMarketDataByRedis()
 		//读取旧数据，直接从redis中获取
+		fmt.Println(dataOneMin.MarketData)
 		fmt.Println(newMarketPrice)
-		msg := logic.RiskControl(newMarketPrice,f)
+		msg := logic.RiskControl(newMarketPrice,dataOneMin.MarketData,f)
 		fmt.Println(msg)
 		//println(msg)
 		time.Sleep(1*time.Second)

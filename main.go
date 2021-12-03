@@ -6,7 +6,6 @@ import (
 	"go.uber.org/zap"
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
-	"redisData/logger"
 	"redisData/routes"
 	"redisData/setting"
 )
@@ -18,14 +17,6 @@ func main() {
 		zap.L().Error("viper init fail", zap.Error(err))
 		return
 	}
-
-	//初始化日志
-	if err := logger.InitLogger(viper.GetString("mode")); err != nil {
-		zap.L().Error("init logger fail err", zap.Error(err))
-		return
-	}
-	defer zap.L().Sync() //把缓冲区的日志添加
-	zap.L().Debug("init logger success")
 
 	//初始化MySQL
 	mysql.InitMysql()
