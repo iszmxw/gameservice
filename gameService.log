@@ -1,0 +1,1 @@
+{"level":"ERROR","time":"2021-12-02T12:00:47.462+0800","caller":"gameService/client.go:41","msg":"init redis fail err","error":"dial tcp 127.0.0.1:6379: connectex: No connection could be made because the target machine actively refused it."}
