@@ -19,8 +19,13 @@ var (
 
 // 初始化日志配置
 
-func init() {
-	filename := "logs/" + time.Now().Format("2006-01-02") + ".log"
+func Init(Service string) {
+	filename := ""
+	if len(Service) > 0 {
+		filename = "logs/" + Service + "/" + time.Now().Format("2006-01-02") + ".log"
+	} else {
+		filename = "/logs/" + time.Now().Format("2006-01-02") + ".log"
+	}
 	level := zap.DebugLevel
 	NewDevelopmentEncoderConfig := zap.NewDevelopmentEncoderConfig()
 	NewDevelopmentEncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
