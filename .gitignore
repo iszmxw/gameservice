@@ -1,0 +1,5 @@
+.idea/
+tmp/
+conf/*
+logs/*.log
+logs/*.log.gz
