@@ -48,6 +48,10 @@ func GetAssertsData(pageSize int,category int) *model.ResponseDataList {
 
 //ManageData 数据处理逻辑1.判断数据是否存在集合中 是就跳过，不是存在list里面
 func ManageData(data *model.ResponseDataList){
+	if data == nil{
+		logger.Info("数据为空")
+		return
+	}
 
 	for _,v := range data.List{
 
