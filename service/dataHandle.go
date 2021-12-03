@@ -7,7 +7,6 @@
 package main
 
 import (
-	"go.uber.org/zap"
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
 	"redisData/logic"
@@ -15,26 +14,31 @@ import (
 	"redisData/setting"
 )
 
-func main() {
-	//初始化viper
+func init() {
+	// 定义日志目录
+	logger.Init("dataHandle")
+	// 初始化 viper 配置
 	if err := setting.Init(""); err != nil {
-		zap.L().Error("viper init fail", zap.Error(err))
+		logger.Info("viper init fail")
+		logger.Error(err)
 		return
 	}
-
-	//初始化MySQL
+	// 初始化MySQL
 	mysql.InitMysql()
-
 	//初始化redis
 	if err := redis.InitClient(); err != nil {
-		zap.L().Error("init redis fail err", zap.Error(err))
+		logger.Info("init redis fail err")
+		logger.Error(err)
 		return
 	}
 	defer redis.Close()
+}
 
-	for  {
+func main() {
+
+	for {
 		str := redis.RmListHead("assertList")
-		if len(str) == 0{
+		if len(str) == 0 {
 			logger.Info("kongshuju")
 			continue
 		}
