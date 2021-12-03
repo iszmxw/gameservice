@@ -46,14 +46,14 @@ func main() {
 	//开始缓存
 	for {
 		//创建egg:id
-		//logic.CreatEggData()
+		logic.CreatEggData()
 		//fmt.Println(111)
 		//创建egg:id
 		//logic.CreatPotionData()
 		//fmt.Println(222)
 		//创建 eggDataList
 		logic.SetDataInRedis()
-		//logic.SetEggMarketPrice()
+		logic.SetEggMarketPrice()
 		fmt.Println("redis数据已更新")
 		time.Sleep(time.Second*30)
 
