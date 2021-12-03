@@ -19,7 +19,6 @@ func init() {
 		logger.Error(err)
 		return
 	}
-	// 初始化MySQL
 	mysql.InitMysql()
 	//初始化redis
 	if err := redis.InitClient(); err != nil {

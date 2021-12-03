@@ -25,11 +25,9 @@ func init() {
 		logger.Error(err)
 		return
 	}
-	// 初始化MySQL
 	mysql.InitMysql()
 	//初始化redis
 	if err := redis.InitClient(); err != nil {
-		logger.Info("init redis fail err")
 		logger.Error(err)
 		return
 	}
@@ -39,13 +37,13 @@ func init() {
 func main() {
 	for {
 		//1.请求数据
-		pageSize := 300
+		pageSize := 10
 		category := 17
 		data := logic.GetAssertsData(pageSize, category)
 		fmt.Println("拿到数据")
 		//计算市场价然后返回
 		logic.SetMarketPriceOnline(data)
 		fmt.Println("算出市场价")
-		time.Sleep(2 * time.Second)
+		time.Sleep(1 * time.Second)
 	}
 }

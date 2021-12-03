@@ -37,11 +37,10 @@ func init() {
 }
 
 func main() {
-
 	//开始缓存
 	for {
 		//创建egg:id
-		logic.CreatEggData()
+		//logic.CreatEggData()
 		//fmt.Println(111)
 		//创建egg:id
 		//logic.CreatPotionData()

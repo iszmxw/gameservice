@@ -35,7 +35,6 @@ func init() {
 }
 
 func main() {
-
 	for {
 		str := redis.RmListHead("assertList")
 		if len(str) == 0 {
