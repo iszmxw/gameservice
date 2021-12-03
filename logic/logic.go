@@ -8,6 +8,7 @@ package logic
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -19,7 +20,7 @@ import (
 	"time"
 )
 
-// RequestEggData 获取鸡蛋的数据,取出全部id拼接成切片
+// RequestEggData 获取鸡蛋的数据,返回id切片
 func RequestEggData() ([]int, error) {
 	url := "https://market-api.radiocaca.com/nft-sales?pageNo=1&pageSize=20&sortBy=created_at&order=desc&name=&saleType&category=17&tokenType"
 	response, err := http.Get(url)
@@ -247,6 +248,10 @@ func SetBuyALG(marketPrice float64, percentage float64) {
 	//}
 	//联网访问买入的数据
 	data := GetAssertsData(100, 17)
+	if data == nil{
+		logger.Info("拿不到数据")
+		return
+	}
 	for _, v := range data.List {
 		//查看集合是否已经存在，存在就不加入列表了
 		flag := redis.ExistEle("buySet1", strconv.Itoa(v.Id))
@@ -301,6 +306,9 @@ func SetEggMarketPrice() {
 		logger.Error(err)
 		return
 	}
+	if len(redisdata) < 150{
+		return
+	}
 	//计算出市场价格存进redis和mysql
 	// 序列化返回的结果
 	var data model.Data
@@ -352,19 +360,15 @@ func SetEggMarketPrice() {
 }
 
 // RiskControl 风险控制,传入最新的市场价格，和承受波动百分比
-func RiskControl(marketPrice float64, percentage float64) string {
+func RiskControl(marketPrice float64, currentMarketPricePrice float64,percentage float64) string {
 	//当前市场价,从redis中取上一次的
-	var currentMarketPricePrice float64
-	oldMarkerPrice, _ := redis.GetData("eggMarket")
-	currentMarketPricePrice, err := strconv.ParseFloat(oldMarkerPrice, 64)
-	if err != nil {
-		logger.Error(err)
-		return ""
-	}
-	logger.Info(marketPrice)
-	logger.Info(currentMarketPricePrice)
-	logger.Info((marketPrice / currentMarketPricePrice) - 1)
-	logger.Info(1 - (currentMarketPricePrice / marketPrice))
+	//var currentMarketPricePrice float64
+	//oldMarkerPrice, _ := redis.GetData("eggMarket")
+	//currentMarketPricePrice, err := strconv.ParseFloat(oldMarkerPrice, 64)
+	//if err != nil {
+	//	logger.Error(err)
+	//	return ""
+	//}
 	if (marketPrice/currentMarketPricePrice)-1 >= (percentage * 0.01) {
 		//停止买入脚本，且发邮件通知,使用上一次的market和现在的market对比，上一次的market从redis中读，新的marketPrice重新算
 		return "目前涨幅超过预期百分比"
@@ -378,13 +382,17 @@ func RiskControl(marketPrice float64, percentage float64) string {
 
 // SetDataInRedis 访问网上的数据保存到redis,定时逻辑在main函数上面加
 func SetDataInRedis() error {
-	url := "https://market-api.radiocaca.com/nft-sales?pageNo=1&pageSize=50&sortBy=created_at&order=desc&name=&saleType&category=17&tokenType"
+	url := "https://market-api.radiocaca.com/nft-sales?pageNo=1&pageSize=300&sortBy=created_at&order=desc&name=&saleType&category=17&tokenType"
 	response, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 	body, _ := ioutil.ReadAll(response.Body)
+	if len(body) < 150 {
+		logger.Info("访问频繁限制")
+		return errors.New("访问频繁限制")
+	}
 	//fmt.Println(body)
 	//把得到的数据存进redis key为eggData
 	CreateKeyErr := redis.CreateKey(
