@@ -33,10 +33,11 @@ func init() {
 		logger.Error(err)
 		return
 	}
-	defer redis.Close()
+
 }
 
 func main() {
+	defer redis.Close()
 	for {
 		//1.请求数据
 		pageSize := 300

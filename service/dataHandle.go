@@ -31,10 +31,11 @@ func init() {
 		logger.Error(err)
 		return
 	}
-	defer redis.Close()
+
 }
 
 func main() {
+	defer redis.Close()
 	for {
 		str := redis.RmListHead("assertList")
 		if len(str) == 0 {

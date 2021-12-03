@@ -20,61 +20,7 @@ import (
 	"time"
 )
 
-// RequestEggData 获取鸡蛋的数据,返回id切片
-func RequestEggData() ([]int, error) {
-	url := "https://market-api.radiocaca.com/nft-sales?pageNo=1&pageSize=20&sortBy=created_at&order=desc&name=&saleType&category=17&tokenType"
-	response, err := http.Get(url)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	body, _ := ioutil.ReadAll(response.Body)
-	// 序列化返回的结果
-	var data model.Data
-	if Uerr := json.Unmarshal(body, &data); Uerr != nil {
-		logger.Error(Uerr)
-	}
-	//取出里面的ID返回到数组里面去
-	idList := make([]int, 100)
-	for _, v := range data.List {
-		idList = append(idList, v.Id)
-	}
-	return idList, nil
-}
 
-// RequestPotionData 获取药水的数据,取出全部id拼接成切片
-func RequestPotionData() ([]int, error) {
-	url := "https://market-api.radiocaca.com/nft-sales?pageNo=1&pageSize=20&sortBy=created_at&order=desc&name=&saleType&category=15&tokenType"
-	response, err := http.Get(url)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	body, _ := ioutil.ReadAll(response.Body)
-	// 序列化返回的结果
-	var data model.Data
-	if Uerr := json.Unmarshal(body, &data); Uerr != nil {
-		logger.Error(Uerr)
-	}
-	//取出里面的ID返回到数组里面去
-	idList := make([]int, 30)
-	for _, v := range data.List {
-		idList = append(idList, v.Id)
-	}
-	return idList, nil
-}
-
-//RequestDataDetail 根据id访问详情
-func RequestDataDetail(id int) (detailData string) {
-	url := fmt.Sprintf("https://market-api.radiocaca.com/nft-sales/%d", id)
-	response, Rerr := http.Get(url)
-	if Rerr != nil {
-		logger.Error(Rerr)
-		return
-	}
-	body, _ := ioutil.ReadAll(response.Body)
-	return string(body)
-}
 
 //CreatEggData 遍历鸡蛋数据存进redis
 func CreatEggData() {
@@ -150,41 +96,7 @@ func GetKeysByPfx(keypfx string) ([]model.Rdata, error) {
 	return dataDetailMap, nil
 }
 
-//RequestGetEggPrice 通过请求拿到鸡蛋数据
-func RequestGetEggPrice() ([]float64, error) {
-	url := "https://market-api.radiocaca.com/nft-sales?pageNo=1&pageSize=20&sortBy=created_at&order=desc&name=&saleType&category=17&tokenType"
-	response, err := http.Get(url)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	body, _ := ioutil.ReadAll(response.Body)
-	// 序列化返回的结果
-	var data model.Data
-	if Uerr := json.Unmarshal(body, &data); Uerr != nil {
-		logger.Error(Uerr)
-	}
-	//做逻辑运算 1.算出均价 2.确定价格 3.返回价格 先不存redis
-	//list存下全部均价
-	list := make([]float64, 0, len(data.List))
-	for _, v := range data.List {
-		fixedPrice, FErr := strconv.ParseFloat(v.FixedPrice, 64)
-		if v.Count != 1 {
-			if FErr != nil {
-				logger.Error(err)
-				return nil, err
-			}
-			count := float64(v.Count)
-			price := fixedPrice / count
-			list = append(list, price)
-		}
-		if v.Count == 1 {
-			list = append(list, fixedPrice)
-		}
-	}
 
-	return list, nil
-}
 
 // SortSlice 输入一个切片然后进行排序，得出比重最多的价格，作为市场价
 func SortSlice(priceList []float64) (marketPrice []float64) {
@@ -407,15 +319,7 @@ func SetDataInRedis() error {
 
 }
 
-// GetDataInRedis 从redis中取出数据，运算使用
-func GetDataInRedis(key string) (string, error) {
-	data, err := redis.GetData(key)
-	if err != nil {
-		logger.Error(err)
-		return "", err
-	}
-	return data, nil
-}
+
 
 //GetMarketDataByRedis 根据redis的历史数据，算出历史的数据
 func GetMarketDataByRedis() float64 {
