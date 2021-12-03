@@ -34,10 +34,11 @@ func init() {
 		logger.Error(err)
 		return
 	}
-	defer redis.Close()
+
 }
 
 func main() {
+	defer redis.Close()
 	//开始缓存
 	for {
 		var buy, _ = redis.GetData("buy")

@@ -33,10 +33,11 @@ func init() {
 		logger.Error(err)
 		return
 	}
-	defer redis.Close()
+
 }
 
 func main() {
+	defer redis.Close()
 	//开始缓存
 	for {
 		//创建egg:id
@@ -56,5 +57,6 @@ func main() {
 		time.Sleep(time.Second * 30)
 
 	}
+
 
 }

@@ -31,11 +31,12 @@ func init() {
 		logger.Error(err)
 		return
 	}
-	defer redis.Close()
+
 
 }
 
 func main() {
+	defer redis.Close()
 	//获取10s前的市场价格
 	//获取30s前的市场价格
 	//获取60秒前的市场价格

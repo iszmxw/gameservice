@@ -34,10 +34,11 @@ func init() {
 		logger.Error(err)
 		return
 	}
-	defer redis.Close()
+
 }
 
 func main() {
+	defer redis.Close()
 	//定义全局代表收益
 	var account float64
 	for {
