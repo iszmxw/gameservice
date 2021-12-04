@@ -1,0 +1,4 @@
+#!/bin/bash
+
+git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch conf/config.yaml.example' --prune-empty --tag-name-filter cat -- --all
+git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch logic/chain.go' --prune-empty --tag-name-filter cat -- --all
