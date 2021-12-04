@@ -1,0 +1,37 @@
+version: V1.0.0
+name: "gameService"
+mode: "dev"
+port: 8887
+start_time: "2021-11-01"
+machine_id: 1
+dataNum: 300
+
+redis:
+  host: "10.10.10.200"
+  port: 6379
+  password: ""
+  db: 8
+  pool_size: 100
+mysql:
+  host: "10.10.10.200"
+  port: 3306
+  user: "zwh"
+  password: "123456"
+  dbname: "zwh"
+  prefix: ""
+  charset: "utf8mb4"
+  max_idle_connections: 500
+  max_open_connections: 500
+  max_life_seconds: 300
+email:
+  email_type: "QQ"
+  qq_email_addr: "smtp.qq.com:587"
+  qq_email_host: "smtp.qq.com"
+  qq_email_user: "mail@54zm.com"
+  qq_email_password: "123456"
+  google_email_addr: "smtp.gmail.com:465"
+  google_email_user: "asdfghjkl@gmail.com"
+  google_email_password: "123456"
+
+apiKey: "123456789123456789"
+
