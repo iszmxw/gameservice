@@ -1,5 +1,5 @@
 .idea/
 tmp/
-conf/*
+conf/*.yaml
 logs/*
 logs/*.log.gz
