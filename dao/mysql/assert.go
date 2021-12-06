@@ -42,3 +42,33 @@ func GetDataByGid(gid string) *model.AssetsDetails {
 
 
 }
+
+// GetAssetName 通过type_id 获取type的名字
+func GetAssetName(typeId int) *model.AssetsType {
+	data := model.AssetsType{}
+	err := mysql.DB.Model(model.AssetsType{}).Where("type_id",typeId).Find(&data).Error
+	if err != nil{
+		logger.Error(err)
+		return nil
+	}
+	return &data
+
+}
+
+// GetBuyData 根据id判断买入卖出数据
+func GetBuyData(t int) (data []model.Buy)  {
+	if err := mysql.DB.Model(model.Buy{}).Where("type",t).Order("id desc").Limit(10).Find(&data).Error;err!=nil{
+		logger.Error(err)
+		return nil
+	}
+	return data
+}
+
+// GetBuyById  根据id判断买入卖出数据
+func GetBuyById(Gid string) (data []model.Buy)  {
+	if err := mysql.DB.Model(model.Buy{}).Where("gid",Gid).Limit(1).Find(&data).Error;err!=nil{
+		logger.Error(err)
+		return nil
+	}
+	return data
+}

@@ -39,7 +39,7 @@ func main() {
 	for {
 		str := redis.RmListHead("assertList")
 		if len(str) == 0 {
-			logger.Info("kongshuju")
+			logger.Info("当前数据处理完毕")
 			continue
 		}
 		go logic.StoreListToMysql(str)

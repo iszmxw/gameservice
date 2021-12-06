@@ -8,7 +8,6 @@ package logic
 
 import (
 	"encoding/json"
-	"fmt"
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
 	"redisData/model"
@@ -44,78 +43,34 @@ func ManageData(data *model.ResponseDataList){
 	}
 }
 
-
-
 //StoreListToMysql 把redis中队列中的数据储存到mysql
 func StoreListToMysql(str string)  {
-			logger.Info(str)
-			l :=  model.List{}
-			err := json.Unmarshal([]byte(str), &l)
-			if err != nil {
-				logger.Error(err)
-				return
-			}
-			d := model.AssetsData{
-				GId: strconv.Itoa(l.Id),
-				Name: l.Name,
-				FixedPrice: l.FixedPrice,
-				HighestPrice: l.HighestPrice,
-				ImageUrl: l.ImageUrl,
-				Count: l.Count,
-				SaleType: l.SaleType,
-				TokenId: l.TokenId,
-				SaleAddress: l.SaleAddress,
-				Status: l.Status,
-			}
-			mysql.CreateOneAssert(d)
-			SetAssertsDetails(strconv.Itoa(l.Id))
-
-
-}
-
-//SetMarketPriceOnline 计算市场数据实时,顺便把市场价格表也做出来，返回map序列化后添加进入redis key为eggProportion:时间戳
-func SetMarketPriceOnline(data *model.ResponseDataList)  {
-	list := make([]float64, 0, len(data.List))
-	for _, v := range data.List {
-		fixedPrice, FErr := strconv.ParseFloat(v.FixedPrice, 64)
-		if FErr != nil {
-			logger.Error(FErr)
+		logger.Info(str)
+		l :=  model.List{}
+		err := json.Unmarshal([]byte(str), &l)
+		if err != nil {
+			logger.Error(err)
 			return
 		}
-		count := float64(v.Count)
-		if v.Count != 1 {
-			price := fixedPrice / count
-			list = append(list, price)
+		d := model.AssetsData{
+			GId: strconv.Itoa(l.Id),
+			Name: l.Name,
+			FixedPrice: l.FixedPrice,
+			HighestPrice: l.HighestPrice,
+			ImageUrl: l.ImageUrl,
+			Count: l.Count,
+			SaleType: l.SaleType,
+			TokenId: l.TokenId,
+			SaleAddress: l.SaleAddress,
+			Status: l.Status,
 		}
-		if v.Count == 1 {
-			list = append(list, fixedPrice)
-		}
+		mysql.CreateOneAssert(d)
+		RequestAssertsDetails(strconv.Itoa(l.Id))
 
-	}
-	//市场价等于list[0]
-	//把市场价存进redis,存进mysql
-	//strMarketPrice := strconv.FormatFloat(list[0], 'E', -1, 64)
-	//logger.Info(strMarketPrice)
-	//排序
-	if len(list) <=0 {
-		logger.Info("list为空")
-		return
-	}
-	list1 := SortSlice(list)
-	//切割数据中的name作为key
-	strName := data.List[0].Name
-	//categoryName := utils.Split(strName," ")
-	err := redis.CreateKey(fmt.Sprintf("%sMarkerPrice",strName), list1[0])
-	logger.Info(fmt.Sprintf("%sMarkerPrice",strName))
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	//存进mysql
-	data1 := model.MarketData{
-		MarketName:strName,
-		MarketData: list1[0],
-	}
-	mysql.InsertMarketPrice(data1)
+
 }
+
+
+
+
 

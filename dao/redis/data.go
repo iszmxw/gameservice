@@ -93,7 +93,7 @@ func GetKeysByPfx(keypfx string) ([]string,error) {
 }
 
 func CreateKey(key string, value interface{}) error {
-	err := rdb.Set(key, value, 6000*time.Second).Err()
+	err := rdb.Set(key, value, 5*time.Second).Err()
 	//log.Println("redis finish create or change")
 	if err != nil {
 		log.Println(err)
@@ -110,11 +110,14 @@ func CreateDurableKey(key string, value interface{}) error {
 		log.Println(err)
 		return err
 	}
+	logger.Info("创建key")
+	logger.Info(key)
 	return nil
 
 }
 
 func GetData(key string) (data string,err error) {
+	logger.Info(key)
 	res, err := rdb.Get(key).Result()
 	if err != nil{
 		logger.Error(err)
@@ -147,11 +150,11 @@ func ExistEle(key string,value string) bool {
 
 //hash相关操作
 
-//创建hash的key
+// CreatHashKey 创建hash的key
 func CreatHashKey(key string,m map[string]interface{})  {
 	rdb.HMSet(key,m)
 }
-//根据key读hash中的全部数据
+// GetHashDataAll 根据key读hash中的全部数据
 func GetHashDataAll(key string) map[string]string {
 	result, err := rdb.HGetAll(key).Result()
 	if err != nil {

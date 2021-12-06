@@ -16,56 +16,10 @@ import (
 	"redisData/dao/redis"
 	"redisData/model"
 	"redisData/pkg/logger"
+	"redisData/utils"
 	"strconv"
 	"time"
 )
-
-
-
-//CreatEggData 遍历鸡蛋数据存进redis
-func CreatEggData() {
-	data, err := RequestEggData()
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	for _, v := range data {
-		if v == 0 {
-			continue
-		}
-		//判断集合中是否存在,存在就是买入,然后跳过
-		fmt.Println(time.Now())
-		flag := redis.ExistEle("buySet1", strconv.Itoa(v))
-		fmt.Println(time.Now())
-		logger.Info(flag)
-		logger.Info(strconv.Itoa(v))
-		if flag == true {
-			continue
-		}
-		go func() {
-			DetailData := RequestDataDetail(v)
-			redis.CreateEggData(strconv.Itoa(v), DetailData)
-		}()
-
-	}
-}
-
-//CreatPotionData 遍历药水数据存进redis
-func CreatPotionData() {
-
-	data, err := RequestPotionData()
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	for _, v := range data {
-		if v == 0 {
-			continue
-		}
-		DetailData := RequestDataDetail(v)
-		redis.CreatePotionData(strconv.Itoa(v), DetailData)
-	}
-}
 
 // GetKeysByPfx 根据前缀遍历key 拼接数据
 func GetKeysByPfx(keypfx string) ([]model.Rdata, error) {
@@ -95,7 +49,6 @@ func GetKeysByPfx(keypfx string) ([]model.Rdata, error) {
 	//}
 	return dataDetailMap, nil
 }
-
 
 
 // SortSlice 输入一个切片然后进行排序，得出比重最多的价格，作为市场价
@@ -142,28 +95,28 @@ func SortSlice(priceList []float64) (marketPrice []float64) {
 	return s3
 }
 
-// SetBuyALG 设置买入买出算法,无返回值
-func SetBuyALG(marketPrice float64, percentage float64) {
-	//1.从redis取出egg列表的数据
-	//redisData, err := GetDataInRedis("eggDataList")
-	//if err != nil {
-	//	logger.Error(err)
-	//	return
-	//}
+//SetBuyALG 设置买入买出算法,无返回值
+func SetBuyALG(key string,marketPrice float64, percentage float64) {
+	redisdata, err := redis.GetData(key)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
 
-	//对redisData 进行反序列化
-	//var data model.Data
-	//Unmarshalerr := json.Unmarshal([]byte(redisData), &data)
-	//if Unmarshalerr != nil {
-	//	logger.Error(Unmarshalerr)
-	//	return
-	//}
-	//联网访问买入的数据
-	data := GetAssertsData(100, 17)
-	if data == nil{
+	if len(redisdata) < 150{
+		return
+	}
+	//计算出市场价格存进redis和mysql
+	// 序列化返回的结果
+	var data model.ResponseDataList
+	if Uerr := json.Unmarshal([]byte(redisdata), &data); Uerr != nil {
+		logger.Error(Uerr)
+	}
+	if data.List == nil{
 		logger.Info("拿不到数据")
 		return
 	}
+
 	for _, v := range data.List {
 		//查看集合是否已经存在，存在就不加入列表了
 		flag := redis.ExistEle("buySet1", strconv.Itoa(v.Id))
@@ -186,7 +139,11 @@ func SetBuyALG(marketPrice float64, percentage float64) {
 		logger.Info((marketPrice *(percentage*0.01))-avgPrice)
 		percentage = 100 - percentage
 		if (marketPrice * (percentage*0.01)) > avgPrice  {
-			redis.CreateZScoreData("buySet",strconv.Itoa(v.Id),avgPrice)
+			//买入时加入一个多一个标识
+			memberKey := fmt.Sprintf("%s:%s",v.Name,strconv.Itoa(v.Id))
+
+
+			redis.CreateZScoreData("buySet",memberKey,avgPrice)
 			redis.CreateSetData("buySet1", strconv.Itoa(v.Id))
 			buy := model.Buy{
 				Gid: strconv.Itoa(v.Id),
@@ -209,10 +166,10 @@ func SetBuyALG(marketPrice float64, percentage float64) {
 	return
 }
 
-// SetEggMarketPrice 获取市场数据，缓存到redis,同时存到MySQL
-func SetEggMarketPrice() {
+// SetMarketPrice 获取市场数据，缓存到redis,同时存到MySQL
+func SetMarketPrice(key string) {
 	//从redis中获取鸡蛋的数据
-	redisdata, err := redis.GetData("eggDataList")
+	redisdata, err := redis.GetData(key)
 	//logger.Info(redisdata)
 	if err != nil {
 		logger.Error(err)
@@ -234,7 +191,6 @@ func SetEggMarketPrice() {
 		fixedPrice, FErr := strconv.ParseFloat(v.FixedPrice, 64)
 		count := float64(v.Count)
 		if v.Count != 1 {
-
 			if FErr != nil {
 				logger.Error(err)
 				return
@@ -257,18 +213,20 @@ func SetEggMarketPrice() {
 		return
 	}
 	list1 := SortSlice(list)
-	err = redis.CreateKey("eggMarket", list1[0])
-	logger.Info("添加eggMarket成功")
+	marketKey := fmt.Sprintf("%s.MarketPrice",data.List[0].Name)
+	err = redis.CreateDurableKey(marketKey, list1[0])
+	logger.Info("添加Market成功")
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 	//存进mysql
 	data1 := model.MarketData{
-		MarketName: "egg",
+		MarketName: marketKey,
 		MarketData: list1[0],
 	}
 	mysql.InsertMarketPrice(data1)
+	time.Sleep(1*time.Second)
 }
 
 // RiskControl 风险控制,传入最新的市场价格，和承受波动百分比
@@ -319,12 +277,10 @@ func SetDataInRedis() error {
 
 }
 
-
-
 //GetMarketDataByRedis 根据redis的历史数据，算出历史的数据
-func GetMarketDataByRedis() float64 {
+func GetMarketDataByRedis(assetsListKey string) float64 {
 	//从redis中获取鸡蛋的数据
-	redisdata, err := redis.GetData("eggDataList")
+	redisdata, err := redis.GetData(assetsListKey)
 	if err != nil {
 		logger.Error(err)
 		return 0
@@ -365,47 +321,67 @@ func GetMarketDataByRedis() float64 {
 }
 
 // SetSaleALG 设置卖出算法
-func SetSaleALG(account float64,percentage float64) float64 {
-	strData, err := redis.GetData("eggMarket")
+func SetSaleALG(marketPriceKey string,account float64,percentage float64)  {
+	strData, err := redis.GetData(marketPriceKey)
+	//把产品名称切割出来
+	product := utils.Split(marketPriceKey,".")[0]
+	logger.Info(product)
 	if err != nil {
 		fmt.Println(err)
-		return 0
+		return
 	}
-
 	MarketPrice,err := strconv.ParseFloat(strData,64)
 	if err != nil{
 		fmt.Println(err)
-		return 0
+		return
 	}
 	//读入买入数据,对比市场价决定卖出
 	strSlice := redis.GetAllZSet("buySet")
 	for _,v  := range strSlice{
+		//判断下种类,不是同一个种类跳过
+		productName := utils.Split(v,":")[0]
+		if product != productName{
+			continue
+		}
 		score := redis.GetScoreByMember("buySet", v)
 		//判断是否卖出
-		if score.(float64) *(percentage+100) *0.01 < MarketPrice{
-			account = account + score.(float64) *(percentage+100) *0.01 - score.(float64)
-
+		if score.(float64) *(percentage+100) *0.01 < MarketPrice*0.99  {
+			//定义卖出价格
+			salePrice := MarketPrice * 0.99
+			account = account + salePrice - score.(float64)
 			logger.Info("赚了")
 			logger.Info(score.(float64) *(percentage+100) *0.01)
 			logger.Info(score.(float64))
-			logger.Info(score.(float64) *(percentage+100) *0.01 - score.(float64))
+			logger.Info(salePrice - score.(float64))
 		}
-		redis.DeleteSetData("buySet1",v)
+		redis.DeleteSetData("buySet1",utils.Split(v,":")[1])
 		redis.DeleteRecByMember("buySet",v)
+		//mysql根据gid查询一下
+		gId := utils.Split(v,":")[1]
+		buyData := mysql.GetBuyById(gId)
 		//mysql添加买出记录
 		buy := model.Buy{
-			Gid:v,
+			Gid:utils.Split(v,":")[1],
+			Name: utils.Split(v,":")[0],
 			MarketPrice: MarketPrice,
-			FixedPrice: score.(float64) *(percentage+100) *0.01,
+			Count: buyData[0].Count,
+			FixedPrice: score.(float64),
 			Type: 2,
-			Profit: score.(float64) *(percentage+100) *0.01 - score.(float64),
+			Profit: MarketPrice * 0.99 - score.(float64),
+			SalePrice: MarketPrice * 0.99,
 		}
 		mysql.InsertBuyRecord(buy)
 	}
 	//移除redis中buySet集合
-	return account
+	//count 存redis
+	Cerr := redis.CreateDurableKey("income", account)
+	if Cerr != nil {
+		fmt.Println(err)
+		return
+	}
 
 }
+
 
 
 

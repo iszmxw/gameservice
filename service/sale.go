@@ -40,19 +40,30 @@ func init() {
 func main() {
 	defer redis.Close()
 	//定义全局代表收益
-	var account float64
 	for {
 		//调用卖出逻辑
+		marketPriceKey :=  "Metamon Egg.MarketPrice"
 		var sale, _ = redis.GetData("sale")
 		f, _ := strconv.ParseFloat(sale, 64)
 		fmt.Printf("买出设置百分比为%f\n", f)
-		account = logic.SetSaleALG(account, f)
-		err := redis.CreateDurableKey("income", account)
-		fmt.Println(account)
+
+		//从redis读取
+		if !redis.ExistKey("income"){
+			err := redis.CreateDurableKey("income",0)
+			if err != nil {
+				logger.Error(err)
+				return 
+			}
+		}
+		data, err := redis.GetData("income")
+
 		if err != nil {
-			fmt.Println(err)
+			logger.Error(err)
 			return
 		}
-		time.Sleep(10 * time.Second)
+		account, _ := strconv.ParseFloat(data, 64)
+		logger.Info(account)
+		logic.SetSaleALG(marketPriceKey,account, f)
+		time.Sleep(2 * time.Second)
 	}
 }

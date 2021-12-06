@@ -31,8 +31,11 @@ func init() {
 		logger.Error(err)
 		return
 	}
+	
+}
 
-
+func startMonitor(timeLevel int,)  {
+	
 }
 
 func main() {
@@ -50,6 +53,7 @@ func main() {
 	//获取2592000秒的数据 1Mon
 	for {
 		dataOneMin := mysql.GetHistoryMarketData(60, "Metamon Egg")
+		assetsListKey := "Metamon Egg.List"
 		if dataOneMin == nil {
 			logger.Info("mysql获取参数错误")
 			return
@@ -59,13 +63,13 @@ func main() {
 		//从mysql里面拿
 		fmt.Printf("安全监控设置百分比为%f\n", f)
 		//获取最新的市场数据,通过redis计算出来的
-		newMarketPrice := logic.GetMarketDataByRedis()
+
+		newMarketPrice := logic.GetMarketDataByRedis(assetsListKey)
 		//读取旧数据，直接从redis中获取
 		fmt.Println(dataOneMin.MarketData)
 		fmt.Println(newMarketPrice)
 		msg := logic.RiskControl(newMarketPrice, dataOneMin.MarketData, f)
 		fmt.Println(msg)
-		//println(msg)
 		time.Sleep(1 * time.Second)
 	}
 }

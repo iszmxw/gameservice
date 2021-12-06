@@ -7,8 +7,7 @@
 package model
 
 import (
-	"gorm.io/gorm"
-	"time"
+	"redisData/pkg/helpers"
 )
 
 //Rdata 返回给前端的资产详情
@@ -67,19 +66,17 @@ type ResponseDataList struct {
 
 // RespBuy buy表对应的结构体
 type RespBuy struct {
-	Id int `json:"id"`
 	Gid string `json:"gid"`
 	Name string `json:"name"`
 	Count int `json:"count"`
 	FixedPrice float64 `json:"fixed_price"`
+	TotalPrice float64 `json:"total_price"`
 	Type int `json:"type"`
 	SaleAddress string `json:"sale_address"`
 	TokenId string `json:"token_id"`
 	MarketPrice float64 `json:"market_price"`
 	Profit float64 `json:"profit"`
-	CreateTime time.Time `json:"create_time"`
-	UpdateTime time.Time `json:"update_time"`
-	DeleteTime gorm.DeletedAt `json:"delete_time"`
+	CreateTime helpers.TimeNormal `json:"create_time"`
 
 }
 
@@ -136,3 +133,5 @@ type  RespChainData struct {
 		Confirmations     string `json:"confirmations"`
 	} `json:"result"`
 }
+
+
