@@ -135,3 +135,52 @@ type  RespChainData struct {
 }
 
 
+//RespAssetsDetailList 返回资产列表详情
+type RespAssetsDetailList struct {
+	Gid           string `json:"Gid"`
+	Name          string `json:"Name"`
+	Description   string `json:"Description"`
+	ImageUrl      string `json:"ImageUrl"`
+	Count         int    `json:"Count"`
+	FixedPrice    string `json:"FixedPrice"`
+	TotalPrice    string `json:"TotalPrice"`
+	SaleAddress   string `json:"SaleAddress"`
+	IdInContract  string `json:"IdInContract"`
+	TokenId       string `json:"TokenId"`
+	TokenStandard string `json:"TokenStandard"`
+	Owner         string `json:"Owner"`
+	NftAddress    string `json:"NftAddress"`
+	BlockChain    string `json:"BlockChain"`
+	StartTime     string `json:"StartTime"`
+	Status        string `json:"Status"`
+	Properties    string `json:"Properties"`
+	CreatedAt     string `json:"CreatedAt"`
+}
+
+
+//RespBuyAndSale 买卖控制参数
+type RespBuyAndSale struct {
+	FallPercentage string `json:"fall_percentage"`
+	ProductName string `json:"product_name"`
+	RisePercentage string `json:"rise_percentage"`
+	Status string `json:"status"`
+}
+
+// RespAllOnOff 高级开关
+type RespAllOnOff struct {
+	CrlName string`json:"crl_name"`
+	Super string `json:"super"`
+}
+
+type RespAllSwitch struct {
+	BuyAndSale []RespBuyAndSale `json:"buy_and_sale"`
+	AllOnOff []RespAllOnOff   `json:"all_on_off"`
+}
+
+type RespRiskMonitor struct {
+	Situation string `json:"situation"`
+	TimeLevel string `json:"time_level"`
+	Percentage string `json:"percentage"`
+	OperationType string `json:"operation_type"`
+	Status string `json:"status"`
+}

@@ -42,7 +42,8 @@ func main() {
 	//定义全局代表收益
 	for {
 		//调用卖出逻辑
-		marketPriceKey :=  "Metamon Egg.MarketPrice"
+		//marketPriceKey :=  "Metamon Egg.MarketPrice"
+		marketPriceKey := "Potion.MarketPrice"
 		var sale, _ = redis.GetData("sale")
 		f, _ := strconv.ParseFloat(sale, 64)
 		fmt.Printf("买出设置百分比为%f\n", f)

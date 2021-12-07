@@ -30,7 +30,7 @@ type ParamRiskMng struct {
 }
 
 type ParamBuyAndSale struct {
-	ProductName    string  `json:"product_name" form:"product_name"`       //产品名称
+	ProductID    int    `json:"product_id" form:"product_id"`       //产品名称
 	RisePercentage float64 `json:"rise_percentage" form:"rise_percentage"` //上涨百分比
 	FallPercentage float64 `json:"fall_percentage" form:"fall_percentage"` // 下跌百分比
 	Status         int     `json:"status" form:"status"`                   // 1.开  2.关
@@ -38,7 +38,7 @@ type ParamBuyAndSale struct {
 
 type ParamOnOff struct {
 	CrlName string  `json:"crl_name" form:"crl_name"`  //买入总开关  //卖出总开关
-	Super int `json:"super" form:"super"` // 1.关 2.开
+	Super string `json:"super" form:"super"` // 1.关 2.开
 
 }
 
@@ -49,3 +49,6 @@ type ParamTypeId struct {
 type ParamBuyStatus struct {
 	Status int `json:"status" form:"status"`
 }
+
+
+

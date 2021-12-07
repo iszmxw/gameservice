@@ -8,22 +8,42 @@ package main
 
 import (
 	"fmt"
-	"strconv"
+	"redisData/dao/mysql"
+	"redisData/dao/redis"
+	"redisData/pkg/logger"
+	"redisData/setting"
 )
 
-func Hex2Dec(val string) int {
-	n, err := strconv.ParseUint(val, 16, 64)
-	if err != nil {
-		fmt.Println(err)
+func init() {
+	// 定义日志目录
+	logger.Init("redisData")
+	// 初始化 viper 配置
+	if err := setting.Init(""); err != nil {
+		logger.Info("viper init fail")
+		logger.Error(err)
+		return
 	}
-	return int(n)
-}
+	mysql.InitMysql()
+	//初始化redis
+	if err := redis.InitClient(); err != nil {
+		logger.Info("init redis fail err")
+		logger.Error(err)
+		return
+	}
 
-func main() {
-	hex := "00000000000000000000000000000000000000000000a2bc77ee287ecf500000"
-	dec := Hex2Dec(hex)
-	fmt.Println(dec)
-}
+}//func Hex2Dec(val string) int {
+//	n, err := strconv.ParseUint(val, 16, 64)
+//	if err != nil {
+//		fmt.Println(err)
+//	}
+//	return int(n)
+//}
+//
+//func main() {
+//	hex := "00000000000000000000000000000000000000000000a2bc77ee287ecf500000"
+//	dec := Hex2Dec(hex)
+//	fmt.Println(dec)
+//}
 
 //00000000000000000000000000000000000000000000131454ae75bda7500000
 
@@ -46,3 +66,33 @@ func main() {
 //	}
 //
 //}
+
+//func main() {
+//
+//
+//		// 倒序：
+//		var kArray = []string{"1000", "1001", "1002", "1003", "1004", "1005"}
+//		sort.Slice(kArray, func(i, j int) bool {
+//			return kArray[i] > kArray[j]
+//		})
+//		fmt.Println("逆序：", kArray)
+//		// 正序：
+//		sort.Strings(kArray)
+//		fmt.Println("正序：", kArray)
+//
+//
+//}
+
+//func main() {
+//	m := redis.GetHashDataAll("buyAndSale:Metamon Egg")
+//	fmt.Println(m)
+//	data,_ := json.Marshal(m)
+//	fmt.Println(string(data))
+//
+//}
+
+func main() {
+	data := 7.6E+04
+	fmt.Println(data)
+
+}

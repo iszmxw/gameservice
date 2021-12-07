@@ -17,21 +17,28 @@ import (
 	"redisData/model"
 	"redisData/pkg/logger"
 	"redisData/utils"
+	"sort"
 	"strconv"
 	"time"
 )
 
 // GetKeysByPfx 根据前缀遍历key 拼接数据
-func GetKeysByPfx(keypfx string) ([]model.Rdata, error) {
+func GetKeysByPfx(keypfx string) ([]model.RespAssetsDetailList, error) {
 	pfx := fmt.Sprintf("%s:",keypfx)
 	dataList, err := redis.GetKeysByPfx(pfx) //dataList是一个key集合
+	//对list进行排序，只取前面50条数据，展示使用
+	sort.Slice(dataList, func(i, j int) bool {
+		return dataList[i] > dataList[j]
+	})
+	dataList = dataList[:50]
+
 	logger.Info(dataList)
 	if err != nil {
 		logger.Error(err)
 		return nil, err
 	}
 	//使用map来存
-	var dataDetailMap []model.Rdata
+	var dataDetailList []model.RespAssetsDetailList
 	for _, v := range dataList {
 		fmt.Println(v)
 		res, RErr := redis.GetDataByKey(v)
@@ -39,7 +46,7 @@ func GetKeysByPfx(keypfx string) ([]model.Rdata, error) {
 			logger.Error(RErr)
 			return nil, RErr
 		}
-		dataDetailMap = append(dataDetailMap, res)
+		dataDetailList = append(dataDetailList, res)
 	}
 
 	//使用切片来存
@@ -47,7 +54,7 @@ func GetKeysByPfx(keypfx string) ([]model.Rdata, error) {
 	//for _,v := range dataList{
 	//	dataDetailList = append(dataDetailList,v)
 	//}
-	return dataDetailMap, nil
+	return dataDetailList, nil
 }
 
 
@@ -380,6 +387,17 @@ func SetSaleALG(marketPriceKey string,account float64,percentage float64)  {
 		return
 	}
 
+}
+
+// NameTranType 名字转回类型
+func NameTranType(name string)int {
+	switch  name{
+	case "Metamon Egg":
+		return 17
+	case "Potion":
+		return 15
+	}
+	return 0
 }
 
 

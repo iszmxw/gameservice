@@ -71,7 +71,8 @@ func main() {
 	pageSize := 100
 	//开始缓存
 	for {
-		category := 17
+		//category := 17
+		category := 15
 		StartList(pageSize,category)
 	}
 }

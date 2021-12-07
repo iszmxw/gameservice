@@ -36,7 +36,8 @@ func main() {
 	defer redis.Close()
 	for {
 		//1.请求数据 改成redis
-		key := "Metamon Egg.List"
+		//key := "Metamon Egg.List"
+		key := "Potion.List"
 		logic.SetMarketPrice(key)
 
 	}

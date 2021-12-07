@@ -51,8 +51,10 @@ func main() {
 	defer redis.Close()
 	//开始缓存
 	for {
-		key := "Metamon Egg.List"
-		marketPrice, _ := redis.GetData("Metamon Egg.MarketPrice")
+		//key := "Metamon Egg.List"
+		//marketPrice, _ := redis.GetData("Metamon Egg.MarketPrice")
+		key := "Potion.List"
+		marketPrice, _ := redis.GetData("Potion.MarketPrice")
 		startBuy(key,marketPrice)
 	}
 }
