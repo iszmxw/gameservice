@@ -501,3 +501,59 @@ func SetSaleSetHandle(c *gin.Context) {
 		"data": "",
 	})
 }
+
+
+//SetRiskPotionHandle 设置药水风控接口
+func SetRiskPotionHandle(c *gin.Context){
+	//获取参数
+	var p model.ParamRiskMng
+	err := c.Bind(&p)
+	if err != nil {
+		logger.Info(err)
+		return
+	}
+	if p.Situation == "" || p.TimeLevel == 0 || p.Percentage == 0 || p.OperationType == 0 || p.Status == 0 {
+		c.JSON(500, gin.H{
+			"msg":  "缺少相关参数",
+			"code": 500,
+			"data": "",
+		})
+		return
+	}
+	//把数据存进redis 中的哈希表
+	m := make(map[string]interface{})
+	m["Situation"] = p.Situation
+	m["TimeLevel"] = p.TimeLevel
+	m["Percentage"] = p.Percentage
+	m["OperationType"] = p.OperationType
+	m["Status"] = p.Status
+	logger.Info(m)
+	redis.CreatHashKey(fmt.Sprintf("risk:potion:%s", p.Situation), m)
+	//返回参数
+	c.JSON(200, gin.H{
+		"msg":  "ok",
+		"code": 200,
+		"data": "",
+	})
+}
+
+func GetRiskPotionHandle(c *gin.Context){
+	var fall model.RespRiskMonitor
+	var rise model.RespRiskMonitor
+	fallMap := redis.GetHashDataAll("risk:potion:fall")
+	mapstructure.Decode(fallMap, &fall)
+	riseMap := redis.GetHashDataAll("risk:potion:rise")
+	mapstructure.Decode(riseMap, &rise)
+
+	all := make([]model.RespRiskMonitor, 2)
+	all[0] = fall
+	all[1] = rise
+
+	c.JSON(200, gin.H{
+		"msg":  "ok",
+		"code": 200,
+		"data": all,
+	})
+}
+
+

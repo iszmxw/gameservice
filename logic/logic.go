@@ -219,7 +219,9 @@ func SetMarketPrice(key string) {
 		logger.Info("list为空")
 		return
 	}
+	//logger.Info(list)
 	list1 := SortSlice(list)
+	//logger.Info(list1[0])
 	marketKey := fmt.Sprintf("%s.MarketPrice",data.List[0].Name)
 	err = redis.CreateDurableKey(marketKey, list1[0])
 	logger.Info("添加Market成功")
@@ -236,26 +238,6 @@ func SetMarketPrice(key string) {
 	time.Sleep(500*time.Millisecond)
 }
 
-// RiskControl 风险控制,传入最新的市场价格，和承受波动百分比
-func RiskControl(marketPrice float64, currentMarketPricePrice float64,percentage float64) string {
-	//当前市场价,从redis中取上一次的
-	//var currentMarketPricePrice float64
-	//oldMarkerPrice, _ := redis.GetData("eggMarket")
-	//currentMarketPricePrice, err := strconv.ParseFloat(oldMarkerPrice, 64)
-	//if err != nil {
-	//	logger.Error(err)
-	//	return ""
-	//}
-	if (marketPrice/currentMarketPricePrice)-1 >= (percentage * 0.01) {
-		//停止买入脚本，且发邮件通知,使用上一次的market和现在的market对比，上一次的market从redis中读，新的marketPrice重新算
-		return "目前涨幅超过预期百分比"
-	}
-	if 1-(currentMarketPricePrice/marketPrice) >= (percentage * 0.01) {
-		//下架挂单并且重新上架，发邮件通知
-		return "目前跌幅超过预期百分比"
-	}
-	return "当前数据稳定"
-}
 
 // SetDataInRedis 访问网上的数据保存到redis,定时逻辑在main函数上面加
 func SetDataInRedis() error {

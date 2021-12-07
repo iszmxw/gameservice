@@ -37,30 +37,28 @@ func init() {
 	}
 }
 
-func startBuy(listKey string,marketPrice string)  {
+func startBuy(listKey string, marketPrice string) {
 	var buy float64
 	//添加类型判断
-	if strings.Contains(listKey,"Egg"){
+	if strings.Contains(listKey, "Egg") {
 		data1 := redis.GetHashDataAll("BuySet:17")
 		percent := data1["percent"]
-		float,_ := strconv.ParseFloat(percent,64)
+		float, _ := strconv.ParseFloat(percent, 64)
 		buy = float
 	}
-	if strings.Contains(listKey,"Potion"){
+	if strings.Contains(listKey, "Potion") {
 		data1 := redis.GetHashDataAll("BuySet:15")
 		percent := data1["percent"]
-		float,_ := strconv.ParseFloat(percent,64)
+		float, _ := strconv.ParseFloat(percent, 64)
 		buy = float
 	}
-
-
 
 	//f, _ := strconv.ParseFloat(buy, 64)
 	//fmt.Printf("买入设置百分比为%f\n", f)
 	//市场价直接从redis中取
 	float64MarketPrice, _ := strconv.ParseFloat(marketPrice, 64)
 	//执行买入脚本
-	logic.SetBuyALG(listKey,float64MarketPrice, buy)
+	logic.SetBuyALG(listKey, float64MarketPrice, buy)
 	fmt.Println("本轮购买完毕")
 	time.Sleep(time.Second * 1)
 }
@@ -70,19 +68,25 @@ func main() {
 	for {
 
 		all := redis.GetHashDataAll("buyAndSale:buy")
+		logger.Info(all)
+		logger.Info(all["Super"])
 		//判断总开关状态
 		data1 := redis.GetHashDataAll("BuySet:15")
-		if data1["status"] == "1" && all["Super"] == "1"{
+		if data1["status"] == "1" && all["Super"] == "1" {
+			logger.Info("potionList执行买入脚本")
 			key := "Potion.List"
 			marketPrice, _ := redis.GetData("Potion.MarketPrice")
-			startBuy(key,marketPrice)
+			startBuy(key, marketPrice)
 		}
 		data2 := redis.GetHashDataAll("BuySet:17")
+		logger.Info(data2["status"])
+		logger.Info(data2["Super"])
 		if data2["status"] == "1" && all["Super"] == "1" {
+			logger.Info("Egg执行买入脚本")
 			//判断物品开关
 			key := "Metamon Egg.List"
 			marketPrice, _ := redis.GetData("Metamon Egg.MarketPrice")
-			startBuy(key,marketPrice)
+			startBuy(key, marketPrice)
 		}
 		logger.Info("没有符合条件")
 	}
