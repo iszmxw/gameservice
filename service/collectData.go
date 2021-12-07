@@ -66,9 +66,10 @@ func startCollect(key string)  {
 func main() {
 	defer redis.Close()
 	for {
-		//key := "Metamon Egg.List"
-		key := "Potion.List"
 
+		key := "Potion.List"
+		startCollect(key)
+		key = "Metamon Egg.List"
 		startCollect(key)
 	}
 }

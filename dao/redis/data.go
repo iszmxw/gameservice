@@ -93,7 +93,7 @@ func GetKeysByPfx(keypfx string) ([]string,error) {
 }
 
 func CreateKey(key string, value interface{}) error {
-	err := rdb.Set(key, value, 6000*time.Second).Err()
+	err := rdb.Set(key, value, 3600*12*time.Second).Err()
 	//log.Println("redis finish create or change")
 	if err != nil {
 		log.Println(err)

@@ -31,45 +31,33 @@ func init() {
 		logger.Error(err)
 		return
 	}
-	
 }
-
-func startMonitor(timeLevel int,)  {
-	
+func startMonitor(timeLevel int,assets string) {
+	dataOneMin := mysql.GetHistoryMarketData(timeLevel, assets)
+	assetsListKey := fmt.Sprintf("%s.List",assets)
+	if dataOneMin == nil {
+		logger.Info("mysql获取参数错误")
+		return
+	}
+	var safe, _ = redis.GetData("safe")
+	f, _ := strconv.ParseFloat(safe, 64)
+	//从mysql里面拿
+	fmt.Printf("安全监控设置百分比为%f\n", f)
+	//获取最新的市场数据,通过redis计算出来的
+	newMarketPrice := logic.GetMarketDataByRedis(assetsListKey)
+	//读取旧数据，直接从redis中获取
+	fmt.Println(dataOneMin.MarketData)
+	fmt.Println(newMarketPrice)
+	msg := logic.RiskControl(newMarketPrice, dataOneMin.MarketData, f)
+	fmt.Println(msg)
+	time.Sleep(1 * time.Second)
 }
 
 func main() {
 	defer redis.Close()
-	//获取10s前的市场价格
-	//获取30s前的市场价格
-	//获取60秒前的市场价格
-	//获取300秒前的市场价格 5m
-	//获取900秒的市场价格  15m
-	//获取1800秒的市场数据 30m
-	//获取3600秒市场数据 1h
-	//获取14400秒数据 4h
-	//获取86400秒数据 1D
-	//获取604800秒数据 1W
-	//获取2592000秒的数据 1Mon
 	for {
-		dataOneMin := mysql.GetHistoryMarketData(60, "Metamon Egg")
-		assetsListKey := "Metamon Egg.List"
-		if dataOneMin == nil {
-			logger.Info("mysql获取参数错误")
-			return
-		}
-		var safe, _ = redis.GetData("safe")
-		f, _ := strconv.ParseFloat(safe, 64)
-		//从mysql里面拿
-		fmt.Printf("安全监控设置百分比为%f\n", f)
-		//获取最新的市场数据,通过redis计算出来的
 
-		newMarketPrice := logic.GetMarketDataByRedis(assetsListKey)
-		//读取旧数据，直接从redis中获取
-		fmt.Println(dataOneMin.MarketData)
-		fmt.Println(newMarketPrice)
-		msg := logic.RiskControl(newMarketPrice, dataOneMin.MarketData, f)
-		fmt.Println(msg)
-		time.Sleep(1 * time.Second)
+		startMonitor(60,"Metamon Egg")
+
 	}
 }

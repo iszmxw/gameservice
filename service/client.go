@@ -74,5 +74,7 @@ func main() {
 		//category := 17
 		category := 15
 		StartList(pageSize,category)
+		category = 17
+		StartList(pageSize,category)
 	}
 }

@@ -66,20 +66,18 @@ type ResponseDataList struct {
 
 // RespBuy buy表对应的结构体
 type RespBuy struct {
-	Gid string `json:"gid"`
-	Name string `json:"name"`
-	Count int `json:"count"`
-	FixedPrice float64 `json:"fixed_price"`
-	TotalPrice float64 `json:"total_price"`
-	Type int `json:"type"`
-	SaleAddress string `json:"sale_address"`
-	TokenId string `json:"token_id"`
-	MarketPrice float64 `json:"market_price"`
-	Profit float64 `json:"profit"`
-	CreateTime helpers.TimeNormal `json:"create_time"`
-
+	Gid         string             `json:"gid"`
+	Name        string             `json:"name"`
+	Count       int                `json:"count"`
+	FixedPrice  float64            `json:"fixed_price"`
+	TotalPrice  float64            `json:"total_price"`
+	Type        int                `json:"type"`
+	SaleAddress string             `json:"sale_address"`
+	TokenId     string             `json:"token_id"`
+	MarketPrice float64            `json:"market_price"`
+	Profit      float64            `json:"profit"`
+	CreateTime  helpers.TimeNormal `json:"create_time"`
 }
-
 
 // ResponseAssertsDetails 根据ID返回的资产详情信息
 type ResponseAssertsDetails struct {
@@ -107,9 +105,8 @@ type ResponseAssertsDetails struct {
 	Msg  string `json:"msg"`
 }
 
-
 // RespChainData 关联链上数据
-type  RespChainData struct {
+type RespChainData struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 	Result  []struct {
@@ -134,7 +131,6 @@ type  RespChainData struct {
 	} `json:"result"`
 }
 
-
 //RespAssetsDetailList 返回资产列表详情
 type RespAssetsDetailList struct {
 	Gid           string `json:"Gid"`
@@ -157,30 +153,43 @@ type RespAssetsDetailList struct {
 	CreatedAt     string `json:"CreatedAt"`
 }
 
-
 //RespBuyAndSale 买卖控制参数
 type RespBuyAndSale struct {
 	FallPercentage string `json:"fall_percentage"`
-	ProductName string `json:"product_name"`
+	ProductName    string `json:"product_name"`
 	RisePercentage string `json:"rise_percentage"`
-	Status string `json:"status"`
+	RiseStatus     string `json:"rise_status"`
+	FallStatus     string `json:"fall_status"`
 }
 
 // RespAllOnOff 高级开关
 type RespAllOnOff struct {
-	CrlName string`json:"crl_name"`
-	Super string `json:"super"`
+	CrlName string `json:"crl_name"`
+	Super   string `json:"super"`
 }
 
 type RespAllSwitch struct {
-	BuyAndSale []RespBuyAndSale `json:"buy_and_sale"`
-	AllOnOff []RespAllOnOff   `json:"all_on_off"`
+	BuyAndSale []RespBuyAndSaleSet `json:"buy_and_sale"`
+	AllOnOff   []RespAllOnOff      `json:"all_on_off"`
 }
 
 type RespRiskMonitor struct {
-	Situation string `json:"situation"`
-	TimeLevel string `json:"time_level"`
-	Percentage string `json:"percentage"`
+	Situation     string `json:"situation"`
+	TimeLevel     string `json:"time_level"`
+	Percentage    string `json:"percentage"`
 	OperationType string `json:"operation_type"`
-	Status string `json:"status"`
+	Status        string `json:"status"`
+}
+
+type RespAssetType struct {
+	TypeName string `json:"type_name"`
+	TypeID   int    `json:"type_id"`
+}
+
+//RespBuyAndSaleSet 买出设置
+type RespBuyAndSaleSet struct {
+	Percent   string `json:"percent"`
+	ProductId string `json:"product_id"`
+	Status    string `json:"status"`
+	Types     string `json:"types"`
 }

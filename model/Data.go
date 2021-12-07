@@ -132,3 +132,5 @@ type AssetsType struct {
 	TypeId int
 }
 
+
+

@@ -20,11 +20,14 @@ func SetUp() *gin.Engine {
 	v1.GET("/setStartParam",controller.SetStartParamHandler)
 	v1.GET("/getBuyData",controller.GetBuyDataHandle)
 	v1.GET("/setMngRisk",controller.SetMngRiskHandle)
-	v1.GET("/setBuyAndSale",controller.SetBuyAndSaleHandle)
+	//v1.GET("/setBuyAndSale",controller.SetBuyAndSaleHandle)
 	v1.GET("/setParamOnOff",controller.SetParamOnOffHandle)
 	v1.GET("/getScriptStatus",controller.GetScriptStatusHandle)
 	v1.GET("/getRiskMonitor",controller.GetRiskMonitorHandle)
 	v1.GET("/getMarketPriceLine",controller.GetMarketPriceLineHandle)
 	v1.GET("/getIncome",controller.GetIncomeHandle)
+	v1.GET("/getAssetType",controller.GetAssetType)
+	v1.GET("/setBuySet",controller.SetBuySetHandle)
+	v1.GET("/setSaleSet",controller.SetSaleSetHandle)
 	return r
 }

@@ -72,3 +72,25 @@ func GetBuyById(Gid string) (data []model.Buy)  {
 	}
 	return data
 }
+
+
+//GetAssetDetail100 或者最新100条产品详情数据
+func GetAssetDetail100() []model.AssetsDetails {
+	 data := make([]model.AssetsDetails,50)
+	if err := mysql.DB.Model(model.AssetsDetails{}).Order("id desc").Limit(50).Find(&data).Error;err!=nil{
+		logger.Error(err)
+		return nil
+	}
+	return data
+}
+
+
+//GetAssetType 返回资产类型清单
+func GetAssetType() (data []model.AssetsType ) {
+	err := mysql.DB.Model(model.AssetsType{}).Find(&data).Error
+	if err != nil{
+		logger.Error(err)
+		return
+	}
+	return data
+}

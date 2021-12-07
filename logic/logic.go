@@ -233,7 +233,7 @@ func SetMarketPrice(key string) {
 		MarketData: list1[0],
 	}
 	mysql.InsertMarketPrice(data1)
-	time.Sleep(1*time.Second)
+	time.Sleep(500*time.Millisecond)
 }
 
 // RiskControl 风险控制,传入最新的市场价格，和承受波动百分比

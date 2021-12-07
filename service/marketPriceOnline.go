@@ -39,6 +39,8 @@ func main() {
 		//key := "Metamon Egg.List"
 		key := "Potion.List"
 		logic.SetMarketPrice(key)
+		key = "Metamon Egg.List"
+		logic.SetMarketPrice(key)
 
 	}
 }
