@@ -502,7 +502,6 @@ func SetSaleSetHandle(c *gin.Context) {
 	})
 }
 
-
 //SetRiskPotionHandle 设置药水风控接口
 func SetRiskPotionHandle(c *gin.Context){
 	//获取参数
@@ -556,4 +555,26 @@ func GetRiskPotionHandle(c *gin.Context){
 	})
 }
 
+//SetSellingRateHandle 设置卖出率
+func SetSellingRateHandle(c *gin.Context){
+
+}
+
+//GetSellingRateHandle 返回卖出率
+//func GetSellingRateHandle(c *gin.Context){
+//	var p model.ParamSellingRate
+//	BErr := c.Bind(&p)
+//	if BErr != nil {
+//		logger.Error(BErr)
+//		return
+//	}
+//
+//	m := make(map[string]interface{})
+//	m["time_level"] = p.Situation
+//	m["percent"] = p.TimeLevel
+//	m["status"] = p.Percentage
+//	m["types"] = p.OperationType
+//	logger.Info(m)
+//	redis.CreatHashKey(fmt.Sprintf("risk:potion:%s", p.Situation), m)
+//}
 

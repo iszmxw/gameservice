@@ -31,5 +31,6 @@ func SetUp() *gin.Engine {
 	v1.GET("/setSaleSet",controller.SetSaleSetHandle)
 	v1.GET("/setRiskPotion",controller.SetRiskPotionHandle)
 	v1.GET("/getRiskPotion",controller.GetRiskPotionHandle)
+	v1.GET("/setSellingRate",controller.SetSellingRateHandle)
 	return r
 }

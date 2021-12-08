@@ -64,3 +64,9 @@ type ParamBuyAndSaleSet struct {
 //	Percent string
 //	Status int
 //}
+type ParamSellingRate struct {
+	TimeLevel int `json:"time_level" form:"time_level"`
+	Percent string `json:"percent" form:"percent"`
+	Status string `json:"status" form:"status"`
+	Types string `json:"types" form:"types"`
+}
