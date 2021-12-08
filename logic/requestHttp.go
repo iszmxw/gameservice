@@ -21,18 +21,6 @@ import (
 
 
 
-//RequestDataDetail 根据id访问详情
-func RequestDataDetail(id int) (detailData string) {
-	url := fmt.Sprintf("https://market-api.radiocaca.com/nft-sales/%d", id)
-	response, Rerr := http.Get(url)
-	if Rerr != nil {
-		logger.Error(Rerr)
-		return
-	}
-	body, _ := ioutil.ReadAll(response.Body)
-	return string(body)
-
-}
 
 //RequestAssertsData 请求获取数据
 func RequestAssertsData(pageSize int,category int) *model.ResponseDataList {

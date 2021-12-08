@@ -155,9 +155,9 @@ func PotionStart(types string) {
 			return
 		}
 		//旧的数据
-		data := mysql.GetHistoryMarketData(timeLevel, "Potion.List")
+		data := mysql.GetHistoryMarketData(timeLevel, "Potion.MarketPrice")
 		//新的数据
-		newMarketPrice := logic.GetMarketDataByRedis("Potion.MarketPrice")
+		newMarketPrice := logic.GetMarketDataByRedis("Potion.List")
 		if 1-(data.MarketData/newMarketPrice) >= (percentage * 0.01) {
 			//停止买入脚本，且发邮件通知,使用上一次的market和现在的market对比，上一次的market从redis中读，新的marketPrice重新算
 			switch operationType {

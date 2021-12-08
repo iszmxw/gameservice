@@ -503,7 +503,7 @@ func SetSaleSetHandle(c *gin.Context) {
 }
 
 //SetRiskPotionHandle 设置药水风控接口
-func SetRiskPotionHandle(c *gin.Context){
+func SetRiskPotionHandle(c *gin.Context) {
 	//获取参数
 	var p model.ParamRiskMng
 	err := c.Bind(&p)
@@ -536,7 +536,7 @@ func SetRiskPotionHandle(c *gin.Context){
 	})
 }
 
-func GetRiskPotionHandle(c *gin.Context){
+func GetRiskPotionHandle(c *gin.Context) {
 	var fall model.RespRiskMonitor
 	var rise model.RespRiskMonitor
 	fallMap := redis.GetHashDataAll("risk:potion:fall")
@@ -556,25 +556,89 @@ func GetRiskPotionHandle(c *gin.Context){
 }
 
 //SetSellingRateHandle 设置卖出率
-func SetSellingRateHandle(c *gin.Context){
+func SetSellingRateHandle(c *gin.Context) {
+	var p model.ParamSellingRate
+	BErr := c.Bind(&p)
+	if BErr != nil {
+		logger.Error(BErr)
+		return
+	}
 
+	m := make(map[string]interface{})
+	m["time_level"] = p.TimeLevel
+	m["percent"] = p.Percent
+	m["status"] = p.Status
+	m["operation_type"] = p.OperationType
+	logger.Info(m)
+	redis.CreatHashKey("SellingRate", m)
+	c.JSON(200, gin.H{
+		"code": 200,
+		"msg":  "ok",
+		"data": "",
+	})
 }
 
 //GetSellingRateHandle 返回卖出率
-//func GetSellingRateHandle(c *gin.Context){
-//	var p model.ParamSellingRate
-//	BErr := c.Bind(&p)
-//	if BErr != nil {
-//		logger.Error(BErr)
-//		return
-//	}
-//
-//	m := make(map[string]interface{})
-//	m["time_level"] = p.Situation
-//	m["percent"] = p.TimeLevel
-//	m["status"] = p.Percentage
-//	m["types"] = p.OperationType
-//	logger.Info(m)
-//	redis.CreatHashKey(fmt.Sprintf("risk:potion:%s", p.Situation), m)
-//}
+func GetSellingRateHandle(c *gin.Context) {
+	var resp model.RespSellingRate
+	sellRate := redis.GetHashDataAll("SellingRate")
+	mapstructure.Decode(sellRate, &resp)
+	c.JSON(200, gin.H{
+		"code": 200,
+		"msg":  "ok",
+		"data": sellRate,
+	})
+
+}
+
+//GetProportionHandle 返回市场占比
+func GetProportionHandle(c *gin.Context) {
+	//获取参数
+	var p model.ParamProportion
+	BErr := c.Bind(&p)
+	if BErr != nil {
+		logger.Error(BErr)
+		return
+	}
+	if p.TypeId == 0 {
+		p.TypeId = 17
+	}
+	//获取redis里面的数据
+	data := redis.GetHashDataAll(fmt.Sprintf("Proportion:%d", p.TypeId))
+	data1 := redis.GetHashDataAll(fmt.Sprintf("ProportionCount:%d", p.TypeId))
+	logger.Info("111111111111")
+	type M struct {
+		Key float64
+		Val int
+		Count float64
+	}
+	var m []M
+	for i, v := range data {
+		logger.Info(v)
+		for i1,v1 := range data1{
+			logger.Info(v1)
+			if i1 == i{
+				f, _ := strconv.ParseFloat(i, 64)
+				t, _ := strconv.Atoi(v)
+				count, _ := strconv.ParseFloat(v1, 64)
+				m = append(m, M{
+					Key: f,
+					Val: t,
+					Count: count,
+				})
+			}
+		}
+	}
+	logger.Info(m)
+
+
+
+	//返回数据
+	c.JSON(200, gin.H{
+		"code": 200,
+		"msg":  "ok",
+		"data": m,
+	})
+}
+
 

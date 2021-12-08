@@ -54,10 +54,6 @@ func startSale(key string){
 		sale = float
 	}
 
-
-
-
-
 	//调用卖出逻辑
 	//marketPriceKey :=  "Metamon Egg.MarketPrice"
 	//marketPriceKey := "Potion.MarketPrice"

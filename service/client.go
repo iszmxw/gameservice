@@ -139,6 +139,13 @@ func StartConfig() {
 	riskPotionRise["Status"] = "2"	//1.为打开 2.为关闭
 	riskPotionRise["TimeLevel"] = "60"
 	redis.CreatHashKey("risk:potion:rise", riskPotionRise)
+	//设置卖出率参数
+	sellingRate:= make(map[string]interface{}, 4)
+	riskPotionRise["time_level"] = "1"  //1.为停止脚本 2.发送钉钉 3.停止脚本且发送钉钉
+	riskPotionRise["percent"] = "10"
+	riskPotionRise["status"] = "rise"
+	riskPotionRise["operation_type"] = "2"	//1.为打开 2.为关闭
+	redis.CreatHashKey("SellingRate", sellingRate)
 }
 // 获取列表数据到redis
 func main() {

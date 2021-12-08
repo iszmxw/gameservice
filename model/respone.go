@@ -188,8 +188,22 @@ type RespAssetType struct {
 
 //RespBuyAndSaleSet 买出设置
 type RespBuyAndSaleSet struct {
-	Percent   string `json:"percent"`
-	ProductId string `json:"product_id"`
-	Status    string `json:"status"`
-	Types     string `json:"types"`
+	Percent   string `json:"percent" mapstructure:"percent" `
+	ProductId string `json:"product_id" mapstructure:"product_id"`
+	Status    string `json:"status" mapstructure:"status"`
+	Types     string `json:"types" mapstructure:"types"`
+}
+
+//RespSellingRate 设置卖出率参数
+type RespSellingRate struct {
+	TimeLevel     int    `json:"time_level" mapstructure:"time_level"`
+	Percent       string `json:"percent" mapstructure:"percent"`
+	Status        string `json:"status" mapstructure:"status"`
+	OperationType string `json:"operation_type" mapstructure:"operation_type"`
+}
+
+//RespProportion 市场占比
+type RespProportion struct {
+	Key float64 `json:"key" mapstructure:"key"`
+	Value int `json:"value" mapstructure:"value"`
 }

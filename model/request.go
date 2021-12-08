@@ -58,15 +58,16 @@ type ParamBuyAndSaleSet struct {
 	Status string `json:"status" form:"status"`
 	Types string `json:"types" form:"types"`
 }
-////SaleSet 卖入设置
-//type SaleSet struct {
-//	ProductName string
-//	Percent string
-//	Status int
-//}
+
+//ParamSellingRate 卖出率参数
 type ParamSellingRate struct {
 	TimeLevel int `json:"time_level" form:"time_level"`
 	Percent string `json:"percent" form:"percent"`
 	Status string `json:"status" form:"status"`
-	Types string `json:"types" form:"types"`
+	OperationType string `json:"operation_type" form:"operation_type"`
+}
+
+//ParamProportion 获取市场百分比参数
+type ParamProportion struct {
+	TypeId int `json:"type_id"`
 }

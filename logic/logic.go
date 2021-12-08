@@ -8,10 +8,7 @@ package logic
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
 	"redisData/model"
@@ -19,6 +16,7 @@ import (
 	"redisData/utils"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -59,7 +57,7 @@ func GetKeysByPfx(keypfx string) ([]model.RespAssetsDetailList, error) {
 
 
 // SortSlice 输入一个切片然后进行排序，得出比重最多的价格，作为市场价
-func SortSlice(priceList []float64) (marketPrice []float64) {
+func SortSlice(priceList []float64,productID int) (marketPrice []float64) {
 	m1 := make(map[float64]int)
 	var s2 []int
 	var max int
@@ -73,9 +71,11 @@ func SortSlice(priceList []float64) (marketPrice []float64) {
 			m1[v] = 1
 		}
 	}
-	//插入一条redis数据，把这次遍历市场价占比计算后返回
-
-
+	//遍历m1把里面的float转化成string
+	for _, v := range m1 {
+		//拼接成数组
+		s2 = append(s2, v)
+	}
 	// 取出来放进数组
 
 	for _, v := range m1 {
@@ -99,6 +99,17 @@ func SortSlice(priceList []float64) (marketPrice []float64) {
 			s3 = append(s3, k)
 		}
 	}
+	//插入一条redis数据，把这次遍历市场价占比计算后返回
+	if productID != 0{
+		m2 := make(map[string]interface{})
+		for i,v := range m1{
+			str := strconv.FormatFloat(i, 'E', -1, 64)
+			m2[fmt.Sprintf("%s",str)] = v
+		}
+		redis.CreatHashKey(fmt.Sprintf("Proportion:%d",productID),m2)
+		fmt.Println(m2)
+	}
+
 	return s3
 }
 
@@ -175,7 +186,7 @@ func SetBuyALG(key string,marketPrice float64, percentage float64) {
 
 // SetMarketPrice 获取市场数据，缓存到redis,同时存到MySQL
 func SetMarketPrice(key string) {
-	//从redis中获取鸡蛋的数据
+	//从redis中获取市场最新的数据
 	redisdata, err := redis.GetData(key)
 	//logger.Info(redisdata)
 	if err != nil {
@@ -194,37 +205,50 @@ func SetMarketPrice(key string) {
 	//做逻辑运算 1.算出均价 2.确定价格 3.返回价格 先不存redis
 	//list存下全部均价
 	list := make([]float64, 0, len(data.List))
+
+	m := make(map[float64]float64)
 	for _, v := range data.List {
 		fixedPrice, FErr := strconv.ParseFloat(v.FixedPrice, 64)
+		if FErr != nil {
+			logger.Error(err)
+			return
+		}
 		count := float64(v.Count)
-		if v.Count != 1 {
-			if FErr != nil {
-				logger.Error(err)
-				return
-			}
-			price := fixedPrice / count
-			list = append(list, price)
-		}
-		if v.Count == 1 {
-			list = append(list, fixedPrice)
-		}
+		price := fixedPrice / count
+		list = append(list, price)
+		//使用一个map统计数量
 
+		if m[price] == 0 {
+			m[price] = count
+		} else {
+			m[price] = m[price] + count
+		}
+		//map------
 	}
-	//市场价等于list[0]
-	//把市场价存进redis,存进mysql
-	//strMarketPrice := strconv.FormatFloat(list[0], 'E', -1, 64)
-	//logger.Info(strMarketPrice)
-	//排序
+	//使用redis存起来
+	tid := NameTranType(key)
+	m2 := make(map[string]interface{})
+	for i,v := range m{
+		str := strconv.FormatFloat(i, 'E', -1, 64)
+		m2[fmt.Sprintf("%s",str)] = v
+	}
+	redis.CreatHashKey(fmt.Sprintf("ProportionCount:%d",tid),m2)
 	if len(list) <=0 {
 		logger.Info("list为空")
 		return
 	}
-	//logger.Info(list)
-	list1 := SortSlice(list)
+	tranType := NameTranType(key)
+	if tranType == 0{
+		logger.Info("没有对应的产品")
+		return
+	}
+	//logger.Info(tranType)
+	list1 := SortSlice(list,tranType)
+
 	//logger.Info(list1[0])
 	marketKey := fmt.Sprintf("%s.MarketPrice",data.List[0].Name)
 	err = redis.CreateDurableKey(marketKey, list1[0])
-	logger.Info("添加Market成功")
+	//logger.Info("添加Market成功")
 	if err != nil {
 		logger.Error(err)
 		return
@@ -238,33 +262,6 @@ func SetMarketPrice(key string) {
 	time.Sleep(500*time.Millisecond)
 }
 
-
-// SetDataInRedis 访问网上的数据保存到redis,定时逻辑在main函数上面加
-func SetDataInRedis() error {
-	url := "https://market-api.radiocaca.com/nft-sales?pageNo=1&pageSize=300&sortBy=created_at&order=desc&name=&saleType&category=17&tokenType"
-	response, err := http.Get(url)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	body, _ := ioutil.ReadAll(response.Body)
-	if len(body) < 150 {
-		logger.Info("访问频繁限制")
-		return errors.New("访问频繁限制")
-	}
-	//fmt.Println(body)
-	//把得到的数据存进redis key为eggData
-	CreateKeyErr := redis.CreateKey(
-		"eggDataList",
-		string(body),
-	)
-	if CreateKeyErr != nil {
-		logger.Error(CreateKeyErr)
-		return CreateKeyErr
-	}
-	return nil
-
-}
 
 //GetMarketDataByRedis 根据redis的历史数据，算出历史的数据
 func GetMarketDataByRedis(assetsListKey string) float64 {
@@ -305,7 +302,7 @@ func GetMarketDataByRedis(assetsListKey string) float64 {
 		return 0
 	}
 	//算出市场价格
-	marketDataList := SortSlice(list)
+	marketDataList := SortSlice(list,0)
 	return marketDataList[0]
 }
 
@@ -368,19 +365,20 @@ func SetSaleALG(marketPriceKey string,account float64,percentage float64)  {
 		fmt.Println(err)
 		return
 	}
-
 }
 
 // NameTranType 名字转回类型
 func NameTranType(name string)int {
-	switch  name{
-	case "Metamon Egg":
+	switch  {
+	case strings.Contains(name,"Metamon Egg") :
 		return 17
-	case "Potion":
+	case strings.Contains(name,"Potion"):
 		return 15
 	}
 	return 0
 }
+
+
 
 
 

@@ -41,6 +41,5 @@ func main() {
 		logic.SetMarketPrice(key)
 		key = "Metamon Egg.List"
 		logic.SetMarketPrice(key)
-
 	}
 }

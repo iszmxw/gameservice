@@ -154,6 +154,7 @@ func ExistEle(key string,value string) bool {
 func CreatHashKey(key string,m map[string]interface{})  {
 	rdb.HMSet(key,m)
 }
+
 // GetHashDataAll 根据key读hash中的全部数据
 func GetHashDataAll(key string) map[string]string {
 	result, err := rdb.HGetAll(key).Result()

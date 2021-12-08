@@ -7,7 +7,6 @@
 package main
 
 import (
-	"fmt"
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
 	"redisData/pkg/logger"
@@ -31,7 +30,7 @@ func init() {
 		return
 	}
 
-}//func Hex2Dec(val string) int {
+} //func Hex2Dec(val string) int {
 //	n, err := strconv.ParseUint(val, 16, 64)
 //	if err != nil {
 //		fmt.Println(err)
@@ -91,8 +90,13 @@ func init() {
 //
 //}
 
-func main() {
-	data := 7.6E+04
-	fmt.Println(data)
-
-}
+//func main() {
+//	data1 := "1.05E+05"
+//	v1, err := strconv.ParseFloat(data1, 64)
+//	if err != nil {
+//		logger.Error(err)
+//	}
+//	fmt.Println(v1)
+//	//fmt.Println(fmt.Sprintf("%T", v1))
+//	//fmt.Println(fmt.Sprintf("%T", data))
+//}
