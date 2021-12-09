@@ -70,12 +70,14 @@ func StartConfig() {
 	buySet15 := make(map[string]interface{}, 4)
 	buySet15["product_id"] = "15"
 	buySet15["percent"] = "10"
+	buySet15["market_price"] = "7000"
 	buySet15["status"] = "2" //1.打开 2.关闭
 	buySet15["types"] = "1"  //买入固定为1
 	redis.CreatHashKey("BuySet:15", buySet15)
 	//买入元兽蛋参数设置
 	buySet17 := make(map[string]interface{}, 4)
 	buySet17["product_id"] = "17"
+	buySet17["market_price"] = "70000"
 	buySet17["percent"] = "10"
 	buySet17["status"] = "2" //1.打开 2.关闭
 	buySet17["types"] = "1"  //买入固定为1
@@ -85,6 +87,7 @@ func StartConfig() {
 	SaleSet15 := make(map[string]interface{}, 4)
 	SaleSet15["product_id"] = "15"
 	SaleSet15["percent"] = "10"
+	SaleSet15["market_price"] = "9000"
 	SaleSet15["status"] = "2"
 	SaleSet15["types"] = "2"	 //买入固定为2
 	redis.CreatHashKey("SaleSet:15", SaleSet15)
@@ -92,6 +95,7 @@ func StartConfig() {
 	SaleSet17 := make(map[string]interface{}, 4)
 	SaleSet17["product_id"] = "17"
 	SaleSet17["percent"] = "10"
+	SaleSet17["market_price"] = "90000"
 	SaleSet17["status"] = "2"   //默认值是关闭
 	SaleSet17["types"] = "2"	//买入固定为2
 	redis.CreatHashKey("SaleSet:17", SaleSet17)

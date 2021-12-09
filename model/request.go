@@ -54,6 +54,7 @@ type ParamBuyStatus struct {
 //ParamBuyAndSaleSet 买出设置
 type ParamBuyAndSaleSet struct {
 	ProductId string `json:"product_id" form:"product_id"`
+	MarketPrice string `json:"market_price" form:"market_price"`
 	Percent string `json:"percent" form:"percent"`
 	Status string `json:"status" form:"status"`
 	Types string `json:"types" form:"types"`

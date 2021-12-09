@@ -188,10 +188,12 @@ type RespAssetType struct {
 
 //RespBuyAndSaleSet 买出设置
 type RespBuyAndSaleSet struct {
-	Percent   string `json:"percent" mapstructure:"percent" `
-	ProductId string `json:"product_id" mapstructure:"product_id"`
-	Status    string `json:"status" mapstructure:"status"`
-	Types     string `json:"types" mapstructure:"types"`
+	Percent     string `json:"percent" mapstructure:"percent" `
+	MarketPrice string `json:"market_price" mapstructure:"market_price"`
+	ProductId   string `json:"product_id" mapstructure:"product_id"`
+	Status      string `json:"status" mapstructure:"status"`
+	Types       string `json:"types" mapstructure:"types"`
+	AotuMarketprice string `json:"aotu_marketprice" mapstructure:"aotu_marketprice"`
 }
 
 //RespSellingRate 设置卖出率参数
@@ -204,6 +206,6 @@ type RespSellingRate struct {
 
 //RespProportion 市场占比
 type RespProportion struct {
-	Key float64 `json:"key" mapstructure:"key"`
-	Value int `json:"value" mapstructure:"value"`
+	Key   float64 `json:"key" mapstructure:"key"`
+	Value int     `json:"value" mapstructure:"value"`
 }

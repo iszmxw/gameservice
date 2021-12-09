@@ -34,5 +34,7 @@ func SetUp() *gin.Engine {
 	v1.GET("/setSellingRate",controller.SetSellingRateHandle)
 	v1.GET("/getSellingRate",controller.GetSellingRateHandle)
 	v1.GET("/getProportion",controller.GetProportionHandle)
+	//获取买卖数据,这个接口有问题
+	v1.GET("/getBuyAndSaleData",controller.GetBuyAndSaleHandle)
 	return r
 }

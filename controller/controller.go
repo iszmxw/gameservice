@@ -15,6 +15,7 @@ import (
 	"redisData/logic"
 	"redisData/model"
 	"redisData/pkg/logger"
+	"redisData/utils"
 	"strconv"
 )
 
@@ -302,12 +303,17 @@ func GetScriptStatusHandle(c *gin.Context) {
 	//potion := redis.GetHashDataAll("buyAndSale:Potion")
 	//mapstructure.Decode(potion,&Potion)
 
+	//通过reids获取市场价格
+	eggMarket,_ := redis.GetData("Metamon Egg.MarketPrice")
+	PotionMarket,_ := redis.GetData("Potion.MarketPrice")
+
 	//获取元兽蛋买入数据
 	var eggBuy model.RespBuyAndSaleSet
 	eggBuy2 := redis.GetHashDataAll("BuySet:17")
 	logger.Info(eggBuy2)
 	logger.Info(eggBuy)
 	err := mapstructure.Decode(eggBuy2, &eggBuy)
+	eggBuy.AotuMarketprice = eggMarket
 	if err != nil {
 		logger.Error(err)
 		return
@@ -318,16 +324,19 @@ func GetScriptStatusHandle(c *gin.Context) {
 	var eggSale model.RespBuyAndSaleSet
 	egg_sale := redis.GetHashDataAll("SaleSet:17")
 	mapstructure.Decode(egg_sale, &eggSale)
+	eggSale.AotuMarketprice = eggMarket
 	eggSale.ProductId = egg_sale["product_id"]
 	//获取药水买出数据
 	var potionBuy model.RespBuyAndSaleSet
 	potion_buy := redis.GetHashDataAll("BuySet:15")
 	mapstructure.Decode(potion_buy, &potionBuy)
+	potionBuy.AotuMarketprice = PotionMarket
 	potionBuy.ProductId = potion_buy["product_id"]
 	//获取药水卖出数据
 	var potionSale model.RespBuyAndSaleSet
 	potion_sale := redis.GetHashDataAll("SaleSet:15")
 	mapstructure.Decode(potion_sale, &potionSale)
+	potionSale.AotuMarketprice = PotionMarket
 	potionSale.ProductId = potion_sale["product_id"]
 
 	var all model.RespAllSwitch
@@ -467,6 +476,7 @@ func SetBuySetHandle(c *gin.Context) {
 	m["percent"] = p.Percent
 	m["status"] = p.Status
 	m["types"] = p.Types
+	m["market_price"] = p.MarketPrice
 	logger.Info(m)
 	redis.CreatHashKey(fmt.Sprintf("BuySet:%s", p.ProductId), m)
 	//返回参数
@@ -492,6 +502,7 @@ func SetSaleSetHandle(c *gin.Context) {
 	m["percent"] = p.Percent
 	m["status"] = p.Status
 	m["types"] = p.Types
+	m["market_price"] = p.MarketPrice
 	logger.Info(m)
 	redis.CreatHashKey(fmt.Sprintf("SaleSet:%s", p.ProductId), m)
 	//返回参数
@@ -606,7 +617,6 @@ func GetProportionHandle(c *gin.Context) {
 	//获取redis里面的数据
 	data := redis.GetHashDataAll(fmt.Sprintf("Proportion:%d", p.TypeId))
 	data1 := redis.GetHashDataAll(fmt.Sprintf("ProportionCount:%d", p.TypeId))
-	logger.Info("111111111111")
 	type M struct {
 		Key float64
 		Val int
@@ -630,15 +640,91 @@ func GetProportionHandle(c *gin.Context) {
 		}
 	}
 	logger.Info(m)
-
-
-
 	//返回数据
 	c.JSON(200, gin.H{
 		"code": 200,
 		"msg":  "ok",
 		"data": m,
 	})
+}
+
+//GetBuyAndSaleHandle 获取买和出的数据根据时间轴返回
+func GetBuyAndSaleHandle(c *gin.Context)  {
+	//获取当前时间戳
+	now := utils.GetNowTimeS()
+	oneHour := now - 3600
+	twoHour := now -7200
+	threeHour := now - 10800
+	fourHour := now - 14400
+	fiveHour := now - 18000
+	sixHour := now - 21600
+	//把时间转成str
+	nowStr := utils.TimestampToDatetime(now)
+	logger.Info(nowStr)
+	oneHourStr:= utils.TimestampToDatetime(oneHour)
+	logger.Info(oneHourStr)
+	twoHourStr:=utils.TimestampToDatetime(twoHour)
+	threeHourStr:=utils.TimestampToDatetime(threeHour)
+	fourHourStr:=utils.TimestampToDatetime(fourHour)
+	fiveHourStr:=utils.TimestampToDatetime(fiveHour)
+	sixHourStr:=utils.TimestampToDatetime(sixHour)
+
+
+	//返回每小时买入数量
+	c1 := mysql.GetBuyCount(oneHourStr,nowStr)
+	c2 := mysql.GetBuyCount(twoHourStr,oneHourStr)
+	c3 :=mysql.GetBuyCount(threeHourStr,twoHourStr)
+	c4 :=mysql.GetBuyCount(fourHourStr,threeHourStr)
+	c5 :=mysql.GetBuyCount(fiveHourStr,fourHourStr)
+	c6 :=mysql.GetBuyCount(sixHourStr,fiveHourStr)
+
+
+	//每小时买出出数量
+	d1 := mysql.GetSaleCount(oneHourStr,nowStr)
+	d2 :=mysql.GetSaleCount(twoHourStr,oneHourStr)
+	d3 :=mysql.GetSaleCount(threeHourStr,twoHourStr)
+	d4 :=mysql.GetSaleCount(fourHourStr,threeHourStr)
+	d5 :=mysql.GetSaleCount(fiveHourStr,fourHourStr)
+	d6 :=mysql.GetSaleCount(sixHourStr,fiveHourStr)
+
+	//返回数据
+	type TimeToBuy struct {
+		Times string `json:"times"`
+		BuyCount float64 `json:"buy_count"`
+		SaleCount float64 `json:"sale_count"`
+	}
+
+	timeToBuy := make([]TimeToBuy,6)
+	timeToBuy[0].Times = "one"
+	timeToBuy[0].BuyCount = c1
+	timeToBuy[0].BuyCount = d1
+
+	timeToBuy[1].Times = "two"
+	timeToBuy[1].BuyCount = c2
+	timeToBuy[1].BuyCount = d2
+
+	timeToBuy[2].Times = "three"
+	timeToBuy[2].BuyCount = c3
+	timeToBuy[2].BuyCount = d3
+
+	timeToBuy[3].Times = "four"
+	timeToBuy[3].BuyCount = c4
+	timeToBuy[3].BuyCount = d4
+
+	timeToBuy[4].Times = "five"
+	timeToBuy[4].BuyCount = c5
+	timeToBuy[4].BuyCount = d5
+
+	timeToBuy[5].Times = "six"
+	timeToBuy[5].BuyCount = c6
+	timeToBuy[5].BuyCount = d6
+	logger.Info(timeToBuy)
+	c.JSON(200,gin.H{
+		"code":200,
+		"msg":"ok",
+		"data":timeToBuy,
+	})
+
 }
 
 

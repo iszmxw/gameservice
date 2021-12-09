@@ -138,9 +138,9 @@ func SetBuyALG(key string,marketPrice float64, percentage float64) {
 	for _, v := range data.List {
 		//查看集合是否已经存在，存在就不加入列表了
 		flag := redis.ExistEle("buySet1", strconv.Itoa(v.Id))
-		fmt.Println(time.Now())
-		logger.Info(flag)
-		logger.Info(strconv.Itoa(v.Id))
+		//fmt.Println(time.Now())
+		//logger.Info(flag)
+		//logger.Info(strconv.Itoa(v.Id))
 		if flag == true {
 			logger.Info("该资产已经购买")
 			continue
@@ -152,9 +152,9 @@ func SetBuyALG(key string,marketPrice float64, percentage float64) {
 			return
 		}
 		avgPrice := currentPrice / float64(v.Count)
-		logger.Info(marketPrice * percentage-avgPrice)
-		logger.Info(fmt.Sprintf("%v * %v-%v",marketPrice,(percentage*0.01),avgPrice))
-		logger.Info((marketPrice *(percentage*0.01))-avgPrice)
+		//logger.Info(marketPrice * percentage-avgPrice)
+		//logger.Info(fmt.Sprintf("%v * %v-%v",marketPrice,(percentage*0.01),avgPrice))
+		//logger.Info((marketPrice *(percentage*0.01))-avgPrice)
 		percentage = 100 - percentage
 		if (marketPrice * (percentage*0.01)) > avgPrice  {
 			//买入时加入一个多一个标识
@@ -367,6 +367,75 @@ func SetSaleALG(marketPriceKey string,account float64,percentage float64)  {
 	}
 }
 
+// SetSaleALG2 设置卖出算法，买出价格由配置文件决定
+func SetSaleALG2(marketPriceKey string,account float64,percentage float64)  {
+	var marketPrice string
+	t := NameTranType(marketPriceKey)
+	if t == 17{
+		data := redis.GetHashDataAll("SaleSet:17")
+		marketPrice = data["market_price"]
+	}
+	if t == 15{
+		data := redis.GetHashDataAll("SaleSet:15")
+		marketPrice = data["market_price"]
+	}
+
+	strData := marketPrice
+	//logger.Info(strData)
+	//把产品名称切割出来
+	product := utils.Split(marketPriceKey,".")[0]
+	//logger.Info(product)
+	MarketPrice,err := strconv.ParseFloat(strData,64)
+	if err != nil{
+		logger.Info(err)
+		return
+	}
+	//读入买入数据,对比市场价决定卖出
+	strSlice := redis.GetAllZSet("buySet")
+	for _,v  := range strSlice{
+		//判断下种类,不是同一个种类跳过
+		productName := utils.Split(v,":")[0]
+		if product != productName{
+			continue
+		}
+		score := redis.GetScoreByMember("buySet", v)
+		//判断是否卖出
+		if score.(float64) *(percentage+100) *0.01 < MarketPrice*0.99  {
+			//定义卖出价格
+			salePrice := MarketPrice * 0.99
+			account = account + salePrice - score.(float64)
+			logger.Info("赚了")
+			logger.Info(score.(float64) *(percentage+100) *0.01)
+			logger.Info(score.(float64))
+			logger.Info(salePrice - score.(float64))
+		}
+		redis.DeleteSetData("buySet1",utils.Split(v,":")[1])
+		redis.DeleteRecByMember("buySet",v)
+		//mysql根据gid查询一下
+		gId := utils.Split(v,":")[1]
+		buyData := mysql.GetBuyById(gId)
+		//mysql添加买出记录
+		buy := model.Buy{
+			Gid:utils.Split(v,":")[1],
+			Name: utils.Split(v,":")[0],
+			MarketPrice: MarketPrice,
+			Count: buyData[0].Count,
+			FixedPrice: score.(float64),
+			Type: 2,
+			Profit: MarketPrice * 0.99 - score.(float64),
+			SalePrice: MarketPrice * 0.99,
+		}
+		mysql.InsertBuyRecord(buy)
+	}
+	//移除redis中buySet集合
+	//count 存redis
+	Cerr := redis.CreateDurableKey("income", account)
+	if Cerr != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
 // NameTranType 名字转回类型
 func NameTranType(name string)int {
 	switch  {
@@ -378,7 +447,19 @@ func NameTranType(name string)int {
 	return 0
 }
 
+//StopScript 停止脚本
+func StopScript(){
+	//获取买卖脚本的配置文件，修改其中的状态
+	buy15 := redis.GetHashDataAll("BuySet:15")
+	buy15["status"] = "2"
+	buy17 := redis.GetHashDataAll("BuySet:17")
+	buy17["status"] = "2"
+	sale15 := redis.GetHashDataAll("SaleSet:15")
+	sale15["status"] = "2"
+	sale17 := redis.GetHashDataAll("SaleSet:17")
+	sale17["status"] = "2"
 
+}
 
 
 

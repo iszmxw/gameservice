@@ -7,7 +7,6 @@
 package main
 
 import (
-	"fmt"
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
 	"redisData/logic"
@@ -32,7 +31,6 @@ func init() {
 	}
 }
 func startMonitor(m map[string]interface{}) {
-
 	name := m["name"].(string)
 	types := m["type"].(string)
 	//判断是元兽蛋还是药水
@@ -58,7 +56,6 @@ func EggStart(types string) {
 		}
 		//旧的数据
 		data := mysql.GetHistoryMarketData(timeLevel, "Metamon Egg.MarketPrice")
-
 		//新的数据
 		newMarketPrice := logic.GetMarketDataByRedis("Metamon Egg.List")
 		logger.Info(data.MarketData)
@@ -74,11 +71,13 @@ func EggStart(types string) {
 			//停止买入脚本，且发邮件通知,使用上一次的market和现在的market对比，上一次的market从redis中读，新的marketPrice重新算
 			switch operationType {
 			case "1":
-				fmt.Println("停止脚本")
+				logger.Info("停止脚本")
+				logic.StopScript()
 			case "2":
-				fmt.Println("发送钉钉")
+				logger.Info("发送钉钉")
 			case "3":
-				fmt.Println("停止脚本切发送钉钉")
+				logger.Info("停止脚本且发送钉钉")
+				logic.StopScript()
 			}
 		}
 	}
@@ -103,11 +102,13 @@ func EggStart(types string) {
 			//停止买入脚本，且发邮件通知,使用上一次的market和现在的market对比，上一次的market从redis中读，新的marketPrice重新算
 			switch operationType {
 			case "1":
-				fmt.Println("停止脚本")
+				logger.Info("停止脚本")
+				logic.StopScript()
 			case "2":
-				fmt.Println("发送钉钉")
+				logger.Info("发送钉钉")
 			case "3":
-				fmt.Println("停止脚本切发送钉钉")
+				logger.Info("停止脚本且发送钉钉")
+				logic.StopScript()
 			}
 		}
 	}
@@ -133,14 +134,15 @@ func PotionStart(types string) {
 			//停止买入脚本，且发邮件通知,使用上一次的market和现在的market对比，上一次的market从redis中读，新的marketPrice重新算
 			switch operationType {
 			case "1":
-				fmt.Println("停止脚本")
+				logger.Info("停止脚本")
+				logic.StopScript()
 			case "2":
-				fmt.Println("发送钉钉")
+				logger.Info("发送钉钉")
 			case "3":
-				fmt.Println("停止脚本切发送钉钉")
+				logger.Info("停止脚本且发送钉钉")
+				logic.StopScript()
 			}
 		}
-
 	}
 
 	if types == "rise" {
@@ -162,11 +164,13 @@ func PotionStart(types string) {
 			//停止买入脚本，且发邮件通知,使用上一次的market和现在的market对比，上一次的market从redis中读，新的marketPrice重新算
 			switch operationType {
 			case "1":
-				fmt.Println("停止脚本")
+				logger.Info("停止脚本")
+				logic.StopScript()
 			case "2":
-				fmt.Println("发送钉钉")
+				logger.Info("发送钉钉")
 			case "3":
-				fmt.Println("停止脚本切发送钉钉")
+				logger.Info("停止脚本且发送钉钉")
+				logic.StopScript()
 			}
 		}
 	}
