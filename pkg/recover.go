@@ -18,7 +18,7 @@ func Stack(description string) {
 		logger.Error(err1)
 		logger.Error(err2)
 		logger.Error(err3)
-		err := email.SendEmail(description, errInfo, "543619552@qq.com")
+		err := email.SendEmail(description, errInfo, "409541523@qq.com")
 		if err != nil {
 			logger.Error(err)
 		}

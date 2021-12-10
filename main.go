@@ -26,10 +26,11 @@ func init() {
 		logger.Error(err)
 		return
 	}
-	defer redis.Close()
+
 }
 
 func main() {
+	defer redis.Close()
 	// 初始化routes
 	r := routes.SetUp()
 	//err := r.RunTLS(fmt.Sprintf(":%d", viper.GetInt("port")), "./conf/ssl.pem", "./conf/ssl.key")

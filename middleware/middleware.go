@@ -69,23 +69,22 @@ func TraceLogger() gin.HandlerFunc {
 		logger.Info(path)
 		logger.Info(Connection)
 		// 继续往下面执行
-		if Connection != "Upgrade" {
-			switch path {
-			case "/start":
-			case "/klineHistory":
-			case "/getKlineHistory":
-			case "/getData":
-			case "/getMarketPrice":
-			case "/setStartParam":
-			case "/getBuyData":
-				ctx.Next()
-				break
-			default:
-				ctx.String(200, "hello world!")
-				ctx.Abort()
-				break
-			}
-		}
+		//if Connection != "Upgrade" {
+		//	switch path {
+		//	case "/getMarketPrice":
+		//	case "/setStartParam":
+		//	case "/getBuyData":
+		//	case "/setBuyAndSale":
+		//	case "/setParamOnOff":
+		//	case "/setMngRisk":
+		//		ctx.Next()
+		//		break
+		//	default:
+		//		ctx.String(200, "hello world!")
+		//		ctx.Abort()
+		//		break
+		//	}
+		//}
 		ctx.Next()
 	}
 }

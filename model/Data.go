@@ -33,7 +33,6 @@ type List struct {
 	SaleAddress  string `json:"sale_address"`
 }
 
-
 //MarketData 市场数据结构体
 type MarketData struct {
 	Id int
@@ -56,11 +55,11 @@ type Buy struct {
 	TokenId string
 	MarketPrice float64
 	Profit float64
-	CreateTime helpers.TimeNormal
-	UpdateTime helpers.TimeNormal
-	DeleteTime gorm.DeletedAt
+	SalePrice float64
+	CreatedAt helpers.TimeNormal
+	UpdatedAt helpers.TimeNormal
+	DeletedAt gorm.DeletedAt
 }
-
 
 // AssetsData 游戏资产的数据egg和potion
 type AssetsData struct {
@@ -125,3 +124,13 @@ type ChainData struct {
 	Gasused string
 	Confirmations string
 }
+
+//AssetsType 资产类型
+type AssetsType struct {
+	Id int
+	TypeName string
+	TypeId int
+}
+
+
+

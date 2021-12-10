@@ -130,4 +130,31 @@ func Split(s, sep string) (result []string) {
 	return
 }
 
+//DatetimeToTimestamp 时间戳转换
+func DatetimeToTimestamp(datetime string) int64{
+	timeLayout := "2006-01-02 15:04:05"  //转化所需模板
+	loc, _ := time.LoadLocation("Local")    //获取时区
+	tmp, _ := time.ParseInLocation(timeLayout, datetime, loc)
+	timestamp := tmp.Unix()    //转化为时间戳 类型是int64
+	return timestamp
+}
+
+func TimestampToDatetime(timestamp int64) (datetime string) {
+	timeLayout := "2006-01-02 15:04:05"  //转化所需模板
+	datetime = time.Unix(timestamp, 0).Format(timeLayout)
+	fmt.Println(datetime)
+	return datetime
+}
+
+//GetNowTime 获取当前时间返回str
+func GetNowTime() string {
+	timeStr:=time.Now().Format("2006-01-02 15:04:05")
+	return timeStr
+}
+
+func GetNowTimeS() int64 {
+	timeUnix:=time.Now().Unix()
+	return timeUnix
+}
+
 

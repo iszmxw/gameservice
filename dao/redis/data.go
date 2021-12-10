@@ -57,25 +57,25 @@ func CreatePotionData(key string, value interface{}) {
 	}
 }
 
-//输入egg:id或者potion:id 返回对应的结构体
-func GetDataByKey(key string) (model.Rdata,error) {
-	var response model.Rdata
+// GetDataByKey 输入入egg:id或者potion:id 返回对应的结构体
+func GetDataByKey(key string) (model.RespAssetsDetailList,error) {
+	var response model.RespAssetsDetailList
 	res, err := rdb.Get(key).Result()
 	fmt.Println(res)
 	logger.Info("单个key的数据")
 	if err != nil {
 		if err == redis.Nil {
 			logger.Error(err)
-			return model.Rdata{},err
+			return model.RespAssetsDetailList{},err
 			log.Println("key does not exist")
 		}
 		logger.Error(err)
-		return model.Rdata{},err
+		return model.RespAssetsDetailList{},err
 		log.Printf("get name failed, err:%v\n", err)
 	}
 	UnmarshalErr := json.Unmarshal([]byte(res), &response)
 	if UnmarshalErr != nil {
-		return model.Rdata{},UnmarshalErr
+		return model.RespAssetsDetailList{},UnmarshalErr
 	} else {
 		return response,nil
 	}
@@ -93,7 +93,7 @@ func GetKeysByPfx(keypfx string) ([]string,error) {
 }
 
 func CreateKey(key string, value interface{}) error {
-	err := rdb.Set(key, value, 6000*time.Second).Err()
+	err := rdb.Set(key, value, 3600*12*time.Second).Err()
 	//log.Println("redis finish create or change")
 	if err != nil {
 		log.Println(err)
@@ -110,11 +110,14 @@ func CreateDurableKey(key string, value interface{}) error {
 		log.Println(err)
 		return err
 	}
+	logger.Info("创建key")
+	logger.Info(key)
 	return nil
 
 }
 
 func GetData(key string) (data string,err error) {
+	logger.Info(key)
 	res, err := rdb.Get(key).Result()
 	if err != nil{
 		logger.Error(err)
@@ -147,11 +150,12 @@ func ExistEle(key string,value string) bool {
 
 //hash相关操作
 
-//创建hash的key
+// CreatHashKey 创建hash的key
 func CreatHashKey(key string,m map[string]interface{})  {
 	rdb.HMSet(key,m)
 }
-//根据key读hash中的全部数据
+
+// GetHashDataAll 根据key读hash中的全部数据
 func GetHashDataAll(key string) map[string]string {
 	result, err := rdb.HGetAll(key).Result()
 	if err != nil {

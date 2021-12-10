@@ -7,10 +7,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
 	"redisData/logic"
+	"redisData/model"
 	"redisData/pkg/logger"
 	"redisData/setting"
 	"time"
@@ -36,22 +38,38 @@ func init() {
 
 }
 
+func startCollect(key string)  {
+	redisdata, err := redis.GetData(key)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	if len(redisdata) < 150{
+		return
+	}
+	//计算出市场价格存进redis和mysql
+	// 序列化返回的结果
+	var data model.ResponseDataList
+	if Uerr := json.Unmarshal([]byte(redisdata), &data); Uerr != nil {
+		logger.Error(Uerr)
+	}
+	logic.ManageData(&data)
+	fmt.Println("处理数据完毕")
+	//3.持久化到mysql
+	//fmt.Println("持久化到mysql完毕")
+	//for  {
+	//	go logic.StoreListToMysql()
+	//}
+	time.Sleep(1 * time.Second)
+}
+
 func main() {
 	defer redis.Close()
 	for {
-		//1.请求数据
-		pageSize := 300
-		category := 17
-		data := logic.GetAssertsData(pageSize, category)
-		fmt.Println("拿到数据")
-		//2.存redis
-		logic.ManageData(data)
-		fmt.Println("处理数据完毕")
-		//3.持久化到mysql
-		//fmt.Println("持久化到mysql完毕")
-		//for  {
-		//	go logic.StoreListToMysql()
-		//}
-		time.Sleep(30 * time.Second)
+
+		key := "Potion.List"
+		startCollect(key)
+		key = "Metamon Egg.List"
+		startCollect(key)
 	}
 }
