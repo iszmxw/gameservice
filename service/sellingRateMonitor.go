@@ -10,6 +10,7 @@ import (
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
 	"redisData/logic"
+	"redisData/pkg/email"
 	"redisData/pkg/logger"
 	"redisData/setting"
 	"redisData/utils"
@@ -97,6 +98,7 @@ func main() {
 				logic.StopScript()
 			case "2":
 				logger.Info("发送钉钉")
+				email.SendDingMsg("SellingRate","卖出率过低")
 			case "3":
 				logger.Info("停止脚本，且发送钉钉")
 				//获取买卖脚本的配置文件，修改其中的状态

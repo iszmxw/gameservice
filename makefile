@@ -8,14 +8,14 @@ build:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ${BINARY}
 
 run:
-	@go run service/client.go
-	@go run service/collectData.go
-	@go run service/dataHandle.go
-	@go run service/marketPriceOnline.go
-	@go run service/buy.go
-	@go run service/sale.go
-	@go run service/marketMonitor.go
-	@go run main.go
+	@go run ./client
+	@go run ./collectData
+	@go run ./dataHandle
+	@go run ./marketPriceOnline
+	@go run ./buy
+	@go run ./sale
+	@go run ./marketMonitor
+	@go run ./gameService
 
 gotool:
 	go fmt ./

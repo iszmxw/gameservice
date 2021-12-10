@@ -10,6 +10,7 @@ import (
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
 	"redisData/logic"
+	"redisData/pkg/email"
 	"redisData/pkg/logger"
 	"redisData/setting"
 	"strconv"
@@ -75,6 +76,7 @@ func EggStart(types string) {
 				logic.StopScript()
 			case "2":
 				logger.Info("发送钉钉")
+				email.SendDingMsg("egg:risk:fall","鸡蛋下跌风险")
 			case "3":
 				logger.Info("停止脚本且发送钉钉")
 				logic.StopScript()
@@ -106,6 +108,7 @@ func EggStart(types string) {
 				logic.StopScript()
 			case "2":
 				logger.Info("发送钉钉")
+				email.SendDingMsg("egg:risk:rise","鸡蛋上涨风险")
 			case "3":
 				logger.Info("停止脚本且发送钉钉")
 				logic.StopScript()
@@ -138,6 +141,7 @@ func PotionStart(types string) {
 				logic.StopScript()
 			case "2":
 				logger.Info("发送钉钉")
+				email.SendDingMsg("risk:potion:fall","药水下跌风险")
 			case "3":
 				logger.Info("停止脚本且发送钉钉")
 				logic.StopScript()
@@ -168,6 +172,7 @@ func PotionStart(types string) {
 				logic.StopScript()
 			case "2":
 				logger.Info("发送钉钉")
+				email.SendDingMsg("risk:potion:rise","药水上涨风险")
 			case "3":
 				logger.Info("停止脚本且发送钉钉")
 				logic.StopScript()
