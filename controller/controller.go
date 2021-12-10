@@ -624,9 +624,9 @@ func GetProportionHandle(c *gin.Context) {
 	}
 	var m []M
 	for i, v := range data {
-		logger.Info(v)
+		//logger.Info(v)
 		for i1,v1 := range data1{
-			logger.Info(v1)
+			//logger.Info(v1)
 			if i1 == i{
 				f, _ := strconv.ParseFloat(i, 64)
 				t, _ := strconv.Atoi(v)
@@ -639,7 +639,6 @@ func GetProportionHandle(c *gin.Context) {
 			}
 		}
 	}
-	logger.Info(m)
 	//返回数据
 	c.JSON(200, gin.H{
 		"code": 200,
