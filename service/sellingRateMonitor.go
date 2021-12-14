@@ -39,12 +39,15 @@ func init() {
 
 func main() {
 
-	//获取当前时间戳
-	time := utils.GetNowTimeS()
-	//获取redis中的配置参数
-	sellingRateSetting := redis.GetHashDataAll("SellingRate")
-	status := sellingRateSetting["status"]
+
 	for {
+		//获取当前时间戳
+		time := utils.GetNowTimeS()
+		//获取redis中的配置参数
+		sellingRateSetting := redis.GetHashDataAll("SellingRate")
+		status := sellingRateSetting["status"]
+
+
 		if status == "2" {
 			logger.Info("脚本没有打开")
 			continue
@@ -52,7 +55,7 @@ func main() {
 		//计算时间
 		time2 := sellingRateSetting["time_level"]
 		time3, err := strconv.ParseInt(time2, 10, 64)
-		time = time - time3*1800
+		time = time - time3
 		//转化成字符串
 		timestr := utils.TimestampToDatetime(time)
 		if err != nil {
@@ -77,9 +80,7 @@ func main() {
 		}
 		logger.Info(sale)
 		//把剩余的存在redis中的参数读出来
-
 		operation_type := sellingRateSetting["operation_type"]
-
 		percent := sellingRateSetting["percent"]
 		//转化成浮点
 		f, err := strconv.ParseFloat(percent, 64)
@@ -89,6 +90,10 @@ func main() {
 		}
 		//开始监控
 		//判断status判断脚本是否打开
+		if buy == 0{
+			logger.Info("买入数量为零")
+			continue
+		}
 		logger.Info(sale / buy)
 		logger.Info(f * 0.01)
 		if (sale / buy) < f*0.01 {

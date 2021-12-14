@@ -1,14 +1,16 @@
 /**
  @author:way
  @date:2021/12/3
- @note
+ @note 存放http请求
 **/
 
 package logic
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/http"
 	"redisData/dao/mysql"
@@ -16,6 +18,7 @@ import (
 	"redisData/model"
 	"redisData/pkg/logger"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -111,3 +114,196 @@ func RequestAssertsDetails(gid string)  {
 
 }
 
+// RequestChainData 访问链上的数据
+func RequestChainData(gid string) {
+	//通过查询assets_details表的owner地址查询所在的交易
+	data := mysql.GetDataByGid(gid)
+	//通过接口访问owner交易的数据列表
+	url := fmt.Sprintf("https://api.bscscan.com/api?module=account&action=txlist&address=%s&startblock=0&endblock=99999999&page=1&offset=1000&sort=desc&apikey=%s", data.Owner, viper.GetString("apikey"))
+	logger.Info(url)
+	response, Gerr := http.Get(url) //这步访问可能会慢
+	if Gerr != nil {
+		logger.Error(Gerr)
+	}
+	body, _ := ioutil.ReadAll(response.Body)
+	if len(string(body)) < 150 {
+		logger.Info("休息30s")
+		time.Sleep(30 * time.Second)
+		return
+	}
+	//fmt.Println(body)
+	//反序列化成结构体
+	var d model.RespChainData
+	UErr := json.Unmarshal(body, &d)
+	logger.Info(d.Message)
+	if UErr != nil {
+		logger.Error(UErr)
+	}
+	//通过时间戳和时间筛选数据并且存进数据库,筛选数据
+	for _, v := range d.Result {
+		if v.TimeStamp != data.StartTime {
+			continue
+		}
+		if strings.ToLower(v.To) != strings.ToLower(data.SaleAddress) {
+			continue
+		}
+		logger.Info("符合条件")
+		//符合条件就存进数据库
+		chainData := model.ChainData{
+			Gid:               gid,
+			Blocknumber:       v.BlockNumber,
+			Timestamp:         v.TimeStamp,
+			Hash:              v.Hash,
+			Nonce:             v.Nonce,
+			Blockhash:         v.BlockHash,
+			Transactionindex:  v.TransactionIndex,
+			From:              v.From,
+			To:                v.To,
+			Value:             v.Value,
+			Gas:               v.Gas,
+			Gasprice:          v.GasPrice,
+			Iserror:           v.IsError,
+			TxreceiptStatus:   v.TxreceiptStatus,
+			Input:             v.Input,
+			Contractaddress:   v.ContractAddress,
+			Cumulativegasused: v.CumulativeGasUsed,
+			Gasused:           v.GasUsed,
+			Confirmations:     v.Confirmations,
+			PriceHax:          string([]byte(v.Input)[266:330]),
+		}
+		mysql.CreateChainData(chainData)
+	}
+}
+
+//ReqBNTxList 访问币安获取交易列表数据
+//https://api.bscscan.com/api?module=account&action=txlist&address=0xE97Fdca0A3Fc76b3046aE496C1502c9d8dFEf6fc&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=DUKNN1QZMITSSZC61YINTD1CWQ92FWEKHM
+func ReqBNTxList(address string,apikey string,sort string,offset string,page string,contain string)  {
+	//校验参数
+	if len(address) <= 0 {
+		logger.Error(errors.New("输入合约地址为空"))
+		return
+	}
+	if len(apikey) <= 0 {
+		apikey = "DUKNN1QZMITSSZC61YINTD1CWQ92FWEKHM"
+	}
+	if len(sort) <= 0 {
+		sort = "desc"
+	}
+	if len(offset) <= 0 {
+		offset = "100"
+	}
+	if len(page) <= 0 {
+		page = "1"
+	}
+	//逻辑
+	url := fmt.Sprintf("https://api.bscscan.com/api?module=account&action=txlist&address=%s&startblock=0&endblock=99999999&page=%s&offset=%s&sort=%s&apikey=%s",address,page,offset,sort,apikey)
+	logger.Info(url)
+	response, GErr := http.Get(url) //这步访问可能会慢
+	if GErr != nil {
+		logger.Error(GErr)
+		return
+	}
+	//反序列化
+	body, ReadAllErr := ioutil.ReadAll(response.Body)
+	if ReadAllErr != nil{
+		logger.Error(ReadAllErr)
+		return
+	}
+	var resp model.RespBNTxList
+	UnmarshalErr := json.Unmarshal(body,&resp)
+	if UnmarshalErr != nil {
+		logger.Error(UnmarshalErr)
+		return 
+	}
+	//存一分总的
+	CreateDurableKeyErr := redis.CreateDurableKey("txHashList",string(body))
+	if CreateDurableKeyErr != nil {
+		logger.Error(CreateDurableKeyErr)
+		return 
+	}
+	//筛选买入卖出数据,判断是否包含方法
+	for _,v := range resp.Result{
+		if strings.Contains(v.Input,contain){
+			//存2 份redis
+			marshaldata, marshalERR := json.Marshal(v)
+			if marshalERR != nil {
+				logger.Error(marshalERR)
+				return
+			}
+			CreateKeyExpireErr := redis.CreateKeyExpire(fmt.Sprintf("txHash:%s",v.Hash),string(marshaldata),0)
+			if CreateKeyExpireErr != nil {
+				logger.Error(CreateKeyExpireErr)
+				return
+			}
+			//存一份mysql
+			data := model.ChainTxData{
+				BlockNumber: v.BlockNumber,
+				TimeStamp: v.TimeStamp,
+				Hash: v.Hash,
+				Nonce: v.Nonce,
+				BlockHash: v.BlockHash,
+				TransactionIndex: v.TransactionIndex,
+				From: v.From,
+				To: v.To,
+				Value: v.Value,
+				Gas: v.Gas,
+				GasPrice: v.GasPrice,
+				IsError: v.IsError,
+				TxreceiptStatus: v.TxreceiptStatus,
+				Input: v.Input,
+				ContractAddress: v.ContractAddress,
+				Confirmations: v.Confirmations,
+				GasUsed: v.GasUsed,
+				CumulativeGasUsed: v.CumulativeGasUsed,
+			}
+			mysql.CreateBNTxHashList(data)
+		}
+	}
+}
+
+func ReqTxDetailByHash(txHash string) *model.RespTxDetails {
+	url := fmt.Sprintf("https://api.bscscan.com/api?module=proxy&action=eth_getTransactionByHash&txhash=%s&apikey=DUKNN1QZMITSSZC61YINTD1CWQ92FWEKHM",txHash)
+	logger.Info(url)
+	response, GErr := http.Get(url) //这步访问可能会慢
+	if GErr != nil {
+		logger.Error(GErr)
+		return nil
+	}
+	//反序列化
+	body, ReadAllErr := ioutil.ReadAll(response.Body)
+	if ReadAllErr != nil{
+		logger.Error(ReadAllErr)
+		return nil
+	}
+	var data model.RespTxDetails
+	UnmarshalErr := json.Unmarshal(body,&data)
+	if UnmarshalErr != nil {
+		logger.Error(UnmarshalErr)
+		return nil
+	}
+	return &data
+
+}
+
+func ReqGetTxStatus(txHash string) *model.RespTxHashStatus {
+	url := fmt.Sprintf("https://api.bscscan.com/api?module=transaction&action=gettxreceiptstatus&txhash=%s&apikey=DUKNN1QZMITSSZC61YINTD1CWQ92FWEKHM",txHash)
+	logger.Info(url)
+	response, GErr := http.Get(url) //这步访问可能会慢
+	if GErr != nil {
+		logger.Error(GErr)
+		return nil
+	}
+	//反序列化
+	body, ReadAllErr := ioutil.ReadAll(response.Body)
+	if ReadAllErr != nil{
+		logger.Error(ReadAllErr)
+		return nil
+	}
+	var data model.RespTxHashStatus
+	UnmarshalErr := json.Unmarshal(body,&data)
+	if UnmarshalErr != nil {
+		logger.Error(UnmarshalErr)
+		return nil
+	}
+	return &data
+}

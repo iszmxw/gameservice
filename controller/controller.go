@@ -61,14 +61,6 @@ func GetDataHandle(c *gin.Context) {
 
 //GetMarketPriceHandle 获取市场价格
 func GetMarketPriceHandle(c *gin.Context) {
-	//获取参数
-	//var p model.ParamTypeId
-	//Berr := c.Bind(&p)
-	//if Berr != nil {
-	//	logger.Info(Berr)
-	//	return
-	//}
-	//逻辑处理
 
 	sliceInt := []int{17, 15}
 	marketPriceMap := make(map[string]interface{})
@@ -91,54 +83,13 @@ func GetMarketPriceHandle(c *gin.Context) {
 
 }
 
-//SetStartParamHandler 设置启动参数
-func SetStartParamHandler(c *gin.Context) {
-	//获取参数
-	var p model.ParamStart
-	err := c.Bind(&p)
-	if err != nil {
-		logger.Info(err)
-		return
-	}
-	if p.Buy == 0 || p.Sale == 0 || p.Safe == 0 {
-		c.JSON(500, gin.H{
-			"code": 500,
-			"msg":  "缺少相关参数",
-			"data": "",
-		})
-		return
-	}
-	//逻辑处理
-	err1 := redis.CreateDurableKey("buy", p.Buy)
-	if err != nil {
-		logger.Info(err1)
-		return
-	}
-	err2 := redis.CreateDurableKey("sale", p.Sale)
-	if err != nil {
-		logger.Info(err2)
-		return
-	}
-	err3 := redis.CreateDurableKey("safe", p.Safe)
-	if err != nil {
-		logger.Info(err3)
-		return
-	}
-	//返回参数
-	c.JSON(200, gin.H{
-		"msg":  "ok",
-		"code": 200,
-		"data": "",
-	})
-}
-
 // GetBuyDataHandle 返回买入卖出的数据
 func GetBuyDataHandle(c *gin.Context) {
-
 	//通过查询最新10条买入数据
 	data1 := mysql.GetBuyData(1)
 	result1 := make([]model.RespBuy, len(data1))
 	for i, v := range data1 {
+		data2 := mysql.GetDataByGid(v.Gid)
 		result1[i].Gid = v.Gid
 		result1[i].Name = v.Name
 		result1[i].Count = v.Count
@@ -146,15 +97,18 @@ func GetBuyDataHandle(c *gin.Context) {
 		result1[i].MarketPrice = v.MarketPrice
 		result1[i].SaleAddress = v.SaleAddress
 		result1[i].FixedPrice = v.FixedPrice
+		result1[i].SalePrice = v.SalePrice
 		result1[i].TotalPrice = v.FixedPrice * float64(v.Count)
 		result1[i].CreateTime = v.CreatedAt
 		result1[i].Type = v.Type
+		result1[i].IdInContract = data2.IdInContract
 		result1 = append(result1, result1[i])
 	}
 	//通过查询卖出的最新10条数据
 	data2 := mysql.GetBuyData(2)
 	result2 := make([]model.RespBuy, len(data2))
 	for i, v := range data2 {
+		data3 := mysql.GetDataByGid(v.Gid)
 		result2[i].Gid = v.Gid
 		result2[i].Name = v.Name
 		result2[i].Count = v.Count
@@ -165,10 +119,11 @@ func GetBuyDataHandle(c *gin.Context) {
 		result2[i].FixedPrice = v.FixedPrice
 		result2[i].TotalPrice = v.FixedPrice * float64(v.Count)
 		result2[i].CreateTime = v.CreatedAt
+		result2[i].SalePrice = v.SalePrice
 		result2[i].Type = v.Type
+		result2[i].IdInContract = data3.IdInContract
 		result2 = append(result2, result2[i])
 	}
-
 	c.JSON(200, gin.H{
 		"buy_data":  result1,
 		"sale_data": result2,
@@ -178,6 +133,7 @@ func GetBuyDataHandle(c *gin.Context) {
 }
 
 //前端系统监控使用
+//前端api使用
 
 //SetMngRiskHandle 设置风控
 func SetMngRiskHandle(c *gin.Context) {
@@ -214,43 +170,6 @@ func SetMngRiskHandle(c *gin.Context) {
 
 }
 
-//SetBuyAndSaleHandle 设置买入卖出百分比
-func SetBuyAndSaleHandle(c *gin.Context) {
-	//获取参数
-	var p model.ParamBuyAndSale
-	err := c.Bind(&p)
-	if err != nil {
-		logger.Info(err)
-		return
-	}
-	if p.ProductID == 0 {
-		c.JSON(500, gin.H{
-			"code": 500,
-			"msg":  "缺少相关参数",
-			"data": "",
-		})
-		return
-	}
-	//逻辑处理 1.根据ID找到前缀
-	asset := mysql.GetAssetName(p.ProductID)
-	productName := asset.TypeName
-	//把数据存进redis 中的哈希表
-	m := make(map[string]interface{})
-	m["ProductName"] = productName
-	m["RisePercentage"] = p.RisePercentage
-	m["FallPercentage"] = p.FallPercentage
-	m["RiseStatus"] = p.RiseStatus
-	m["FallStatus"] = p.FallStatus
-	logger.Info(m)
-	redis.CreatHashKey(fmt.Sprintf("buyAndSale:%s", productName), m)
-	//返回参数
-	c.JSON(200, gin.H{
-		"msg":  "ok",
-		"code": 200,
-		"data": "",
-	})
-}
-
 //SetParamOnOffHandle 设置买入卖出总开关
 func SetParamOnOffHandle(c *gin.Context) {
 	//获取参数
@@ -260,14 +179,7 @@ func SetParamOnOffHandle(c *gin.Context) {
 		logger.Info(err)
 		return
 	}
-	//if p.CrlName==""||p.Super==0{
-	//	c.JSON(500,gin.H{
-	//		"code":500,
-	//		"msg":"缺少相关参数",
-	//		"data":"",
-	//	})
-	//	return
-	//}
+
 	//把数据存进redis 中的哈希表
 	m := make(map[string]interface{})
 	m["CrlName"] = p.CrlName
@@ -292,16 +204,6 @@ func GetScriptStatusHandle(c *gin.Context) {
 	var saleStruct model.RespAllOnOff
 	sale := redis.GetHashDataAll("buyAndSale:sale")
 	mapstructure.Decode(sale, &saleStruct)
-
-	//获取买入卖出元兽蛋开关
-	//var Egg model.RespBuyAndSale
-	//egg := redis.GetHashDataAll("buyAndSale:Metamon Egg")
-	//mapstructure.Decode(egg,&Egg)
-
-	//获取买入卖出药水开关
-	//var Potion model.RespBuyAndSale
-	//potion := redis.GetHashDataAll("buyAndSale:Potion")
-	//mapstructure.Decode(potion,&Potion)
 
 	//通过reids获取市场价格
 	eggMarket,_ := redis.GetData("Metamon Egg.MarketPrice")
@@ -409,12 +311,6 @@ func GetMarketPriceLineHandle(c *gin.Context) {
 	//六小时前数据 21600
 	time6 := mysql.GetHistoryMarketData(21600, marketPriceKey)
 
-	//strtime1 := strconv.FormatFloat(time1.MarketData, 'E', -1, 64)
-	//strtime2 := strconv.FormatFloat(time2.MarketData, 'E', -1, 64)
-	//strtime3 := strconv.FormatFloat(time3.MarketData, 'E', -1, 64)
-	//strtime4 := strconv.FormatFloat(time4.MarketData, 'E', -1, 64)
-	//strtime5 := strconv.FormatFloat(time5.MarketData, 'E', -1, 64)
-	//strtime6 := strconv.FormatFloat(time6.MarketData, 'E', -1, 64)
 
 	var timeSlice []float64
 	timeSlice = append(timeSlice, time1.MarketData, time2.MarketData, time3.MarketData, time4.MarketData, time5.MarketData, time6.MarketData)
@@ -433,6 +329,16 @@ func GetIncomeHandle(c *gin.Context) {
 	//获取利润
 	data, Gerr := redis.GetData("income")
 	if Gerr != nil {
+		logger.Error(Gerr)
+		return
+	}
+
+	if len(data)<= 0{
+		c.JSON(200, gin.H{
+			"code": 500,
+			"msg":  "暂时还没有产生收入",
+			"data": data,
+		})
 		logger.Error(Gerr)
 		return
 	}
@@ -490,7 +396,6 @@ func SetBuySetHandle(c *gin.Context) {
 //SetSaleSetHandle 设置买入出参数
 func SetSaleSetHandle(c *gin.Context) {
 	var p model.ParamBuyAndSaleSet
-	//var reps model.RespBuyAndSaleSet
 	Eerr := c.Bind(&p)
 	if Eerr != nil {
 		logger.Error(Eerr)
@@ -724,6 +629,29 @@ func GetBuyAndSaleHandle(c *gin.Context)  {
 		"data":timeToBuy,
 	})
 
+}
+
+//UpdateBuy 更新买入数据  //接口更新增加参数type类型的 坑
+func  UpdateBuy(c *gin.Context)  {
+	var p model.Buy
+	var param model.ParamBuy
+	BindErr := c.Bind(&param)
+	if BindErr != nil {
+		logger.Error(BindErr)
+		return
+	}
+	p.Gid = param.GId
+	p.IdInContract = param.IdInContract
+	p.TxHash = param.TxHash
+	//更新mysql的数据
+	mysql.UpdateBuy(p)
+
+	//返回参数
+	c.JSON(200,gin.H{
+		"code":200,
+		"msg":"ok",
+		"data":"",
+	})
 }
 
 

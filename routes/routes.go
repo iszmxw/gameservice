@@ -17,10 +17,8 @@ func SetUp() *gin.Engine {
 	v1 := r.Group("/api/game")
 	v1.GET("/getAssetsDetailList",controller.GetDataHandle)
 	v1.GET("/getMarketPrice",controller.GetMarketPriceHandle)
-	v1.GET("/setStartParam",controller.SetStartParamHandler)
 	v1.GET("/getBuyData",controller.GetBuyDataHandle)
 	v1.GET("/setMngRisk",controller.SetMngRiskHandle)
-	//v1.GET("/setBuyAndSale",controller.SetBuyAndSaleHandle)
 	v1.GET("/setParamOnOff",controller.SetParamOnOffHandle)
 	v1.GET("/getScriptStatus",controller.GetScriptStatusHandle)
 	v1.GET("/getRiskMonitor",controller.GetRiskMonitorHandle)
@@ -36,5 +34,7 @@ func SetUp() *gin.Engine {
 	v1.GET("/getProportion",controller.GetProportionHandle)
 	//获取买卖数据,这个接口有问题
 	v1.GET("/getBuyAndSaleData",controller.GetBuyAndSaleHandle)
+	//更新买卖清单
+	v1.Any("/updateBuy",controller.UpdateBuy)
 	return r
 }

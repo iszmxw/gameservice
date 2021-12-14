@@ -10,41 +10,6 @@ import (
 	"redisData/pkg/helpers"
 )
 
-//Rdata 返回给前端的资产详情
-type Rdata struct {
-	Data struct {
-		Id             int           `json:"id"`
-		Name           string        `json:"name"`
-		Description    string        `json:"description"`
-		CreatedAt      string        `json:"created_at"`
-		CategoryName   string        `json:"category_name"`
-		CollectionName string        `json:"collection_name"`
-		ImageUrl       string        `json:"image_url"`
-		Count          int           `json:"count"`
-		FixedPrice     string        `json:"fixed_price"`
-		TotalPrice     string        `json:"total_price"`
-		HighestPrice   string        `json:"highest_price"`
-		SaleAddress    string        `json:"sale_address"`
-		SaleType       string        `json:"saleType"`
-		IdInContract   string        `json:"id_in_contract"`
-		TokenId        int           `json:"token_id"`
-		TokenStandard  string        `json:"token_standard"`
-		TokenType      int           `json:"token_type"`
-		Owner          string        `json:"owner"`
-		NftAddress     string        `json:"nft_address"`
-		BlockChain     string        `json:"block_chain"`
-		ProtocolFee    string        `json:"protocol_fee"`
-		NeedCheck      int           `json:"need_check"`
-		ShowLeft       int           `json:"show_left"`
-		StartTime      int           `json:"start_time"`
-		EndTime        int           `json:"end_time"`
-		Status         string        `json:"status"`
-		Properties     []interface{} `json:"properties"`
-	} `json:"data"`
-	Code int    `json:"code"`
-	Msg  string `json:"msg"`
-}
-
 // ResponseDataList 返回资产列表数据
 type ResponseDataList struct {
 	Total int    `json:"total"`
@@ -66,17 +31,20 @@ type ResponseDataList struct {
 
 // RespBuy buy表对应的结构体
 type RespBuy struct {
-	Gid         string             `json:"gid"`
-	Name        string             `json:"name"`
-	Count       int                `json:"count"`
-	FixedPrice  float64            `json:"fixed_price"`
-	TotalPrice  float64            `json:"total_price"`
-	Type        int                `json:"type"`
-	SaleAddress string             `json:"sale_address"`
-	TokenId     string             `json:"token_id"`
-	MarketPrice float64            `json:"market_price"`
-	Profit      float64            `json:"profit"`
-	CreateTime  helpers.TimeNormal `json:"create_time"`
+	Gid          string             `json:"gid"`
+	Name         string             `json:"name"`
+	Count        int                `json:"count"`
+	FixedPrice   float64            `json:"fixed_price"`
+	TotalPrice   float64            `json:"total_price"`
+	Type         int                `json:"type"`
+	SaleAddress  string             `json:"sale_address"`
+	TokenId      string             `json:"token_id"`
+	MarketPrice  float64            `json:"market_price"`
+	Profit       float64            `json:"profit"`
+	SalePrice    float64            `json:"sale_price"`
+	IdInContract string             `json:"id_in_contract"`
+	TxHash       string             `json:"tx_hash"`
+	CreateTime   helpers.TimeNormal `json:"create_time"`
 }
 
 // ResponseAssertsDetails 根据ID返回的资产详情信息
@@ -162,17 +130,19 @@ type RespBuyAndSale struct {
 	FallStatus     string `json:"fall_status"`
 }
 
-// RespAllOnOff 高级开关
+// RespAllOnOff 半自动和全自动开关
 type RespAllOnOff struct {
 	CrlName string `json:"crl_name"`
 	Super   string `json:"super"`
 }
 
+//RespAllSwitch 返回全部开关
 type RespAllSwitch struct {
 	BuyAndSale []RespBuyAndSaleSet `json:"buy_and_sale"`
 	AllOnOff   []RespAllOnOff      `json:"all_on_off"`
 }
 
+//RespRiskMonitor 返回分控参数
 type RespRiskMonitor struct {
 	Situation     string `json:"situation"`
 	TimeLevel     string `json:"time_level"`
@@ -181,6 +151,7 @@ type RespRiskMonitor struct {
 	Status        string `json:"status"`
 }
 
+//RespAssetType 返回资产类型
 type RespAssetType struct {
 	TypeName string `json:"type_name"`
 	TypeID   int    `json:"type_id"`
@@ -188,11 +159,11 @@ type RespAssetType struct {
 
 //RespBuyAndSaleSet 买出设置
 type RespBuyAndSaleSet struct {
-	Percent     string `json:"percent" mapstructure:"percent" `
-	MarketPrice string `json:"market_price" mapstructure:"market_price"`
-	ProductId   string `json:"product_id" mapstructure:"product_id"`
-	Status      string `json:"status" mapstructure:"status"`
-	Types       string `json:"types" mapstructure:"types"`
+	Percent         string `json:"percent" mapstructure:"percent" `
+	MarketPrice     string `json:"market_price" mapstructure:"market_price"`
+	ProductId       string `json:"product_id" mapstructure:"product_id"`
+	Status          string `json:"status" mapstructure:"status"`
+	Types           string `json:"types" mapstructure:"types"`
 	AotuMarketprice string `json:"aotu_marketprice" mapstructure:"aotu_marketprice"`
 }
 
@@ -209,3 +180,61 @@ type RespProportion struct {
 	Key   float64 `json:"key" mapstructure:"key"`
 	Value int     `json:"value" mapstructure:"value"`
 }
+
+//RespBNTxList 访问币安网拿到交易列表
+type RespBNTxList struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Result  []struct {
+		BlockNumber       string `json:"blockNumber"`
+		TimeStamp         string `json:"timeStamp"`
+		Hash              string `json:"hash"`
+		Nonce             string `json:"nonce"`
+		BlockHash         string `json:"blockHash"`
+		TransactionIndex  string `json:"transactionIndex"`
+		From              string `json:"from"`
+		To                string `json:"to"`
+		Value             string `json:"value"`
+		Gas               string `json:"gas"`
+		GasPrice          string `json:"gasPrice"`
+		IsError           string `json:"isError"`
+		TxreceiptStatus   string `json:"txreceipt_status"`
+		Input             string `json:"input"`
+		ContractAddress   string `json:"contractAddress"`
+		CumulativeGasUsed string `json:"cumulativeGasUsed"`
+		GasUsed           string `json:"gasUsed"`
+		Confirmations     string `json:"confirmations"`
+	} `json:"result"`
+}
+
+//RespTxHashStatus 响应交易的状态数据
+type RespTxHashStatus struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Result  struct {
+		Status string `json:"status"`
+	} `json:"result"`
+}
+//RespTxDetails 响应交易详情数据
+type RespTxDetails struct {
+	Jsonrpc string `json:"jsonrpc"`
+	Id      int    `json:"id"`
+	Result  struct {
+		BlockHash        string `json:"blockHash"`
+		BlockNumber      string `json:"blockNumber"`
+		From             string `json:"from"`
+		Gas              string `json:"gas"`
+		GasPrice         string `json:"gasPrice"`
+		Hash             string `json:"hash"`
+		Input            string `json:"input"`
+		Nonce            string `json:"nonce"`
+		To               string `json:"to"`
+		TransactionIndex string `json:"transactionIndex"`
+		Value            string `json:"value"`
+		Type             string `json:"type"`
+		V                string `json:"v"`
+		R                string `json:"r"`
+		S                string `json:"s"`
+	} `json:"result"`
+}
+

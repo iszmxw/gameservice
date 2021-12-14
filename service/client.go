@@ -157,7 +157,7 @@ func main() {
 	//初始化配置参数
 	StartConfig()
 	logger.Info("初始化启动参数")
-	pageSize := 200
+	pageSize := 100
 	//开始缓存
 	for {
 		//category := 17

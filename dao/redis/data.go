@@ -103,6 +103,17 @@ func CreateKey(key string, value interface{}) error {
 
 }
 
+func CreateKeyExpire(key string, value interface{},expireTime int) error {
+	err := rdb.Set(key, value, time.Duration(expireTime)*time.Second).Err()
+	//log.Println("redis finish create or change")
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+
+}
+
 func CreateDurableKey(key string, value interface{}) error {
 	err := rdb.Set(key, value,-1).Err()
 	//log.Println("redis finish create or change")

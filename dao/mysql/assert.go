@@ -103,6 +103,7 @@ func GetBuyCount(startTime string, endTime string) float64 {
 	return sum
 }
 
+//GetSaleCount 获取买出数量
 func GetSaleCount(startTime string, endTime string) float64 {
 	var result []float64
 	var sum float64
@@ -120,3 +121,35 @@ func GetBuySaleCountList(startTime string,t int ) []float64{
 	mysql.DB.Raw("SELECT count FROM buy WHERE type = ? and created_at > ?",t ,startTime).Scan(&count)
 	return count
 }
+
+//UpdateBuy 更新buy表,发起交易后返回，更新字段,目前只需要更新hash和状态
+func UpdateBuy(data model.Buy){
+	err := mysql.DB.Model(model.Buy{}).Where("gid",data.Gid).Updates(&data).Error
+	if err != nil{
+		logger.Error(err)
+		return
+	}
+}
+
+//GetBuyDataHashNotNull 获取买入数据，条件hash不等于nil
+func GetBuyDataHashNotNull() *[]model.Buy {
+	var b []model.Buy
+	err := mysql.DB.Model(model.Buy{}).Where("type",1).Not("tx_hash","").Find(&b).Error
+	if err != nil{
+		logger.Error(err)
+		return nil
+	}
+	return &b
+}
+//GetSaleDataHashNotNull 获取买入数据，条件hash不等于nil
+func GetSaleDataHashNotNull()  *[]model.Buy{
+	var b []model.Buy
+	err := mysql.DB.Model(model.Buy{}).Where("type",2).Not("tx_hash","").Find(&b).Error
+	if err != nil{
+		logger.Error(err)
+		return nil
+	}
+	return &b
+}
+
+

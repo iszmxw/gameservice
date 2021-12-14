@@ -8,6 +8,7 @@ package main
 
 import (
 	"fmt"
+	"math/big"
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
 	"redisData/pkg/logger"
@@ -31,12 +32,13 @@ func init() {
 		return
 	}
 
-} //func Hex2Dec(val string) int {
+}
+//func Hex2Dec(val string) *big.Int {
 //	n, err := strconv.ParseUint(val, 16, 64)
 //	if err != nil {
 //		fmt.Println(err)
 //	}
-//	return int(n)
+//	return
 //}
 //
 //func main() {
@@ -57,31 +59,30 @@ func init() {
 //	}
 //}
 //
-func main() {
-	str := "0x467f963d00000000000000000000000051353799f8550c9010a8b0cbfe6c02ca96e026e20000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000012bb890508c125661e03b09ec06e404bc928904000000000000000000000000000000000000000000000028fabd7f1f18d9c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-	str2 := []byte(str)
-	fmt.Println(len(str2))
-	//str3 := "0000000000000000000000000000000000000000000013451eb0c55622e00000"
-	method :=  string(str2[:10])
-	fmt.Println(method)
-	xxx := string(str2[10:74])
-	fmt.Println(xxx)
-	xxx2 := string(str2[74:138])
-	println(xxx2)
-	xxx3 := string(str2[138:202])
-	println(xxx3)
-	xxx4 := string(str2[202:266])
-	println(xxx4)
-	account :=  string(str2[266:330])
-	fmt.Println(account)
-	xxx5 :=  string(str2[330:394])
-	fmt.Println(xxx5)
-	xxx6 :=  string(str2[394:458])
-	fmt.Println(xxx6)
-
-
-
-}
+//func main() {
+//	str := "0xa9059cbb000000000000000000000000bcfd880154009b3063e79f2cd3cdf22ed8e3c7bd00000000000000000000000000000000000000000000000d8d726b7177a80000"
+//	str2 := []byte(str)
+//	fmt.Println(len(str2))
+//	//str3 := "0000000000000000000000000000000000000000000013451eb0c55622e00000"
+//	method :=  string(str2[:10])
+//	fmt.Println(method)
+//	xxx := string(str2[10:74])
+//	fmt.Println(xxx)
+//	xxx2 := string(str2[74:138])
+//	println(xxx2)
+//
+//
+//	xxx3 := string(str2[138:202])
+//	println(xxx3)
+//	xxx4 := string(str2[202:266])
+//	println(xxx4)
+//	account :=  string(str2[266:330])
+//	fmt.Println(account)
+//	xxx5 :=  string(str2[330:394])
+//	fmt.Println(xxx5)
+//	xxx6 :=  string(str2[394:458])
+//	fmt.Println(xxx6)
+//}
 
 //func main() {
 //
@@ -121,3 +122,14 @@ func main() {
 //	timeStr:=time.Now().Format("2006-01-02 15:04:05")
 //	fmt.Println(timeStr)
 //}
+
+
+func hexToBigInt(hex string) *big.Int {
+	n := new(big.Int)
+	n, _ = n.SetString(hex[2:], 16)
+	return n
+}
+func main() {
+	str := "0x000000000000000000000000bcfd880154009b3063e79f2cd3cdf22ed8e3c7bd"
+	fmt.Println(hexToBigInt(str))
+}

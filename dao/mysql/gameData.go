@@ -12,6 +12,7 @@ import (
 	"redisData/pkg/mysql"
 )
 
+//InsertMarketPrice 添加一条市场价格
 func InsertMarketPrice(data model.MarketData)  {
 	err := mysql.DB.Model(model.MarketData{}).Create(&data).Error
 	if err != nil{
@@ -20,6 +21,7 @@ func InsertMarketPrice(data model.MarketData)  {
 	}
 }
 
+//InsertBuyRecord 添加添加买卖数据
 func InsertBuyRecord(data model.Buy)  {
 	err := mysql.DB.Model(model.Buy{}).Create(&data).Error
 	if err != nil{
