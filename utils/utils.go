@@ -8,6 +8,7 @@ import (
 	"fmt"
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
+	"math/big"
 	"redisData/pkg/logger"
 	"strconv"
 	"strings"
@@ -157,4 +158,10 @@ func GetNowTimeS() int64 {
 	return timeUnix
 }
 
+//StringToBigInt 字符转bigint
+func StringToBigInt(hex string) *big.Int {
+		n := new(big.Int)
+		n, _ = n.SetString(hex, 16)
+		return n
+}
 

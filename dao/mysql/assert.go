@@ -61,6 +61,7 @@ func GetBuyData(t int) (data []model.Buy)  {
 		logger.Error(err)
 		return nil
 	}
+	logger.Info(data)
 	return data
 }
 // GetBuyById  根据id判断买入卖出数据

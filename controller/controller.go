@@ -89,6 +89,7 @@ func GetBuyDataHandle(c *gin.Context) {
 	data1 := mysql.GetBuyData(1)
 	result1 := make([]model.RespBuy, len(data1))
 	for i, v := range data1 {
+		if i ==0 {continue}
 		data2 := mysql.GetDataByGid(v.Gid)
 		result1[i].Gid = v.Gid
 		result1[i].Name = v.Name
@@ -102,11 +103,12 @@ func GetBuyDataHandle(c *gin.Context) {
 		result1[i].CreateTime = v.CreatedAt
 		result1[i].Type = v.Type
 		result1[i].IdInContract = data2.IdInContract
-		result1 = append(result1, result1[i])
 	}
 	//通过查询卖出的最新10条数据
 	data2 := mysql.GetBuyData(2)
-	result2 := make([]model.RespBuy, len(data2))
+	logger.Info(data2)
+	logger.Info(len(data2))
+	result2 := make([]model.RespBuy,len(data2))
 	for i, v := range data2 {
 		data3 := mysql.GetDataByGid(v.Gid)
 		result2[i].Gid = v.Gid
@@ -122,7 +124,6 @@ func GetBuyDataHandle(c *gin.Context) {
 		result2[i].SalePrice = v.SalePrice
 		result2[i].Type = v.Type
 		result2[i].IdInContract = data3.IdInContract
-		result2 = append(result2, result2[i])
 	}
 	c.JSON(200, gin.H{
 		"buy_data":  result1,

@@ -23,7 +23,7 @@ import (
 )
 
 
-
+//元兽脚本相关请求
 
 //RequestAssertsData 请求获取数据
 func RequestAssertsData(pageSize int,category int) *model.ResponseDataList {
@@ -51,7 +51,6 @@ func RequestAssertsData(pageSize int,category int) *model.ResponseDataList {
 	}
 	return &d
 }
-
 
 //RequestAssertsDetails 访问获取一条详情数据，并且存入数据库
 func RequestAssertsDetails(gid string)  {
@@ -174,7 +173,6 @@ func RequestChainData(gid string) {
 		mysql.CreateChainData(chainData)
 	}
 }
-
 //ReqBNTxList 访问币安获取交易列表数据
 //https://api.bscscan.com/api?module=account&action=txlist&address=0xE97Fdca0A3Fc76b3046aE496C1502c9d8dFEf6fc&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=DUKNN1QZMITSSZC61YINTD1CWQ92FWEKHM
 func ReqBNTxList(address string,apikey string,sort string,offset string,page string,contain string)  {
@@ -284,7 +282,13 @@ func ReqTxDetailByHash(txHash string) *model.RespTxDetails {
 	return &data
 
 }
+//元兽脚本相关请求
 
+//---------------------------------------------------------------------------
+
+//baby脚本相关请求-
+
+//ReqGetTxStatus 请求baby相关交易的hash
 func ReqGetTxStatus(txHash string) *model.RespTxHashStatus {
 	url := fmt.Sprintf("https://api.bscscan.com/api?module=transaction&action=gettxreceiptstatus&txhash=%s&apikey=DUKNN1QZMITSSZC61YINTD1CWQ92FWEKHM",txHash)
 	logger.Info(url)
@@ -307,3 +311,4 @@ func ReqGetTxStatus(txHash string) *model.RespTxHashStatus {
 	}
 	return &data
 }
+//baby脚本相关请求
