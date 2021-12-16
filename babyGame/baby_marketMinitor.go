@@ -1,18 +1,18 @@
 /**
  @author:way
- @date:2021/12/13
+ @date:2021/12/16
  @note
 **/
+
+
 
 package main
 
 import (
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
-	"redisData/logic"
 	"redisData/pkg/logger"
 	"redisData/setting"
-	"time"
 )
 
 func init() {
@@ -35,18 +35,7 @@ func init() {
 }
 
 func main() {
-	logic.InitConfig()
-	for  {
-		//redis.Close()
-		address := "0x1F6bc601fDe821E0079c89529c79e3C616Da7E22" //市场合约地址
-		apikey := "DUKNN1QZMITSSZC61YINTD1CWQ92FWEKHM" 	//api 请求token
-		sort := "desc" //排序
-		offset := "100" //每次请求数量
-		page := "1"  //页数
-		contain := "0xc37dfc5b"  //0xc37dfc5b 是购买的方法
-		logic.ReqBNTxList(address,apikey,sort,offset,page,contain)
-		time.Sleep(1*time.Second)
-	}
+	//获取当前市场价格
+	//根据输入参数拿对应时间段的市场价
+	//对比风控值
 }
-
-

@@ -11,7 +11,7 @@ package main
 import (
 	"redisData/dao/mysql"
 	"redisData/dao/redis"
-	"redisData/model"
+	"redisData/logic"
 	"redisData/pkg/logger"
 	"redisData/setting"
 	"strconv"
@@ -37,43 +37,45 @@ func init() {
 }
 
 func main() {
-	percentage := -1.0
-	//获取order表里面的全部数据
-	orderList := mysql.GetAllOrder()
-	//对比是否达到盈利点
-	for _,v := range orderList{
-		//状态为1是买入状态
-		if v.Status== 1{
-			//查重避免二次出售
-			if redis.ExistEle("baby:saleOrder",v.TokenId){
-				logger.Info("该订单已经在销售状态")
+
+	for {
+		//判断总开关状态
+		all := redis.GetHashDataAll("baby:ConfigStopAutoSale")
+		data1 := redis.GetHashDataAll("baby:ConfigSale")
+		percent := data1["percent"]
+		percentFloat,ParseFloatErr := strconv.ParseFloat(percent,64)
+		if ParseFloatErr != nil{
+			logger.Error(ParseFloatErr)
+			continue
+		}
+		//判断物品开关
+		//同为1,设定自己买卖的脚本
+		logger.Info(all["Super"])
+		logger.Info(data1["status"])
+		if data1["status"] == "1" && all["Super"] == "1"{
+			logger.Info("执行半自动脚本")
+			marketPrice := data1["market_price"]
+			market_price_float,FloatErr := strconv.ParseFloat(marketPrice,64)
+			if FloatErr != nil{
+				logger.Error(FloatErr)
 				continue
 			}
-			//查询市场价
-			marketPrice, GetDataErr := redis.GetData("baby:marketPrice")
+			logic.StartBuy(market_price_float,percentFloat)
+		}
+		//为1和2设置自动脚本
+		if data1["status"] == "1" && all["Super"] == "2"{
+			logger.Info("执行全自动自动脚本")
+			//
+			marketPriceAuto, GetDataErr := redis.GetData("baby:marketPrice")
 			if GetDataErr != nil {
-				logger.Error(GetDataErr)
-				continue
+				logger.Info(GetDataErr)
+				return
 			}
-			marketPriceFloat,err := strconv.ParseFloat(marketPrice,64)
+			marketPriceFloat,err := strconv.ParseFloat(marketPriceAuto,64)
 			if err != nil{
-				logger.Info(err)
+				logger.Error(err)
 			}
-			//达到盈利点卖出
-			if marketPriceFloat * 0.99 >= v.FixPrice * ((100+percentage)*0.01){
-				//执行更新操作，把status改成2
-				var data model.BabyOrder
-				data.Id= v.Id
-				data.Status = 2
-				data.Profit = marketPriceFloat * 0.99 - v.FixPrice
-				data.SalePrice = marketPriceFloat * 0.99
-				data.TokenId = v.TokenId
-				data.Name = v.Name
-				mysql.UpdateOneOrder(data)
-				//同时把这个token存进redis避免重复购买
-				redis.CreateSetData("baby:saleOrder",v.TokenId)
-			}
+			logic.StartBuy(marketPriceFloat,percentFloat)
 		}
 	}
-
 }
