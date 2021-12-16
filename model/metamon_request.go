@@ -6,6 +6,7 @@
 
 package model
 
+
 // ParamRiskMng 两个上涨和下跌的
 type ParamRiskMng struct {
 	Situation     string  `json:"situation" form:"situation"`           //上涨还是下跌
@@ -54,3 +55,5 @@ type ParamBuy struct {
 	IdInContract string `json:"id_in_contract" form:"id_in_contract"`
 	TxHash       string `json:"tx_hash" form:"tx_hash"`
 }
+
+

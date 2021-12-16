@@ -22,12 +22,5 @@ func CreateChainData(data model.ChainData)  {
 	return
 }
 
-//CreateBNTxHashList 拆分链上的TX列表并且存入数据库
-func CreateBNTxHashList(data model.ChainTxData)  {
-	CreateErr := mysql.DB.Model(model.ChainTxData{}).Create(&data).Error
-	if CreateErr != nil{
-		logger.Error(CreateErr)
-		return
-	}
-}
+
 

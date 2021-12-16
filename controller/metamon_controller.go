@@ -632,7 +632,7 @@ func GetBuyAndSaleHandle(c *gin.Context)  {
 
 }
 
-//UpdateBuy 更新买入数据  //接口更新增加参数type类型的 坑
+//UpdateBuy 更新买入数据  //接口更新增加参数type类型的坑
 func  UpdateBuy(c *gin.Context)  {
 	var p model.Buy
 	var param model.ParamBuy

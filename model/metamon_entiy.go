@@ -11,6 +11,8 @@ import (
 	"redisData/pkg/helpers"
 )
 
+//元兽游戏相关 --------------------------------------
+
 //Data 和 List是次请求中的数据
 type Data struct {
 	Total int    `json:"total"`
@@ -133,28 +135,6 @@ type AssetsType struct {
 	TypeId   int
 }
 
-//ChainTxData 链上交易列表
-type ChainTxData struct {
-	Id                int64              `json:"id"`
-	BlockNumber       string             `json:"block_number"`
-	TimeStamp         string             `json:"time_stamp"`
-	Hash              string             `json:"hash"`
-	Nonce             string             `json:"nonce"`
-	BlockHash         string             `json:"block_hash"`
-	TransactionIndex  string             `json:"transaction_index"`
-	From              string             `json:"from"`
-	To                string             `json:"to"`
-	Value             string             `json:"value"`
-	Gas               string             `json:"gas"`
-	GasPrice          string             `json:"gas_price"`
-	IsError           string             `json:"is_error"`
-	TxreceiptStatus   string             `json:"txreceipt_status"`
-	Input             string             `json:"input"`
-	ContractAddress   string             `json:"contract_address"`
-	CumulativeGasUsed string             `json:"cumulative_gas_used"`
-	GasUsed           string             `json:"gas_used"`
-	Confirmations     string             `json:"confirmations"`
-	CreatedAt         helpers.TimeNormal `json:"created_at"`
-	UpdatedAt         helpers.TimeNormal
-	DeletedAt         gorm.DeletedAt
-}
+//baby游戏相关---------------------------------------------------
+
+

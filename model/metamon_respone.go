@@ -10,6 +10,8 @@ import (
 	"redisData/pkg/helpers"
 )
 
+//元兽游戏相关 --------------------------------------
+
 // ResponseDataList 返回资产列表数据
 type ResponseDataList struct {
 	Total int    `json:"total"`
@@ -181,60 +183,10 @@ type RespProportion struct {
 	Value int     `json:"value" mapstructure:"value"`
 }
 
-//RespBNTxList 访问币安网拿到交易列表
-type RespBNTxList struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-	Result  []struct {
-		BlockNumber       string `json:"blockNumber"`
-		TimeStamp         string `json:"timeStamp"`
-		Hash              string `json:"hash"`
-		Nonce             string `json:"nonce"`
-		BlockHash         string `json:"blockHash"`
-		TransactionIndex  string `json:"transactionIndex"`
-		From              string `json:"from"`
-		To                string `json:"to"`
-		Value             string `json:"value"`
-		Gas               string `json:"gas"`
-		GasPrice          string `json:"gasPrice"`
-		IsError           string `json:"isError"`
-		TxreceiptStatus   string `json:"txreceipt_status"`
-		Input             string `json:"input"`
-		ContractAddress   string `json:"contractAddress"`
-		CumulativeGasUsed string `json:"cumulativeGasUsed"`
-		GasUsed           string `json:"gasUsed"`
-		Confirmations     string `json:"confirmations"`
-	} `json:"result"`
-}
 
-//RespTxHashStatus 响应交易的状态数据
-type RespTxHashStatus struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-	Result  struct {
-		Status string `json:"status"`
-	} `json:"result"`
-}
-//RespTxDetails 响应交易详情数据
-type RespTxDetails struct {
-	Jsonrpc string `json:"jsonrpc"`
-	Id      int    `json:"id"`
-	Result  struct {
-		BlockHash        string `json:"blockHash"`
-		BlockNumber      string `json:"blockNumber"`
-		From             string `json:"from"`
-		Gas              string `json:"gas"`
-		GasPrice         string `json:"gasPrice"`
-		Hash             string `json:"hash"`
-		Input            string `json:"input"`
-		Nonce            string `json:"nonce"`
-		To               string `json:"to"`
-		TransactionIndex string `json:"transactionIndex"`
-		Value            string `json:"value"`
-		Type             string `json:"type"`
-		V                string `json:"v"`
-		R                string `json:"r"`
-		S                string `json:"s"`
-	} `json:"result"`
-}
+
+
+
+
+
 

@@ -17,6 +17,7 @@ import (
 	"redisData/dao/redis"
 	"redisData/model"
 	"redisData/pkg/logger"
+	"redisData/utils"
 	"strconv"
 	"strings"
 	"time"
@@ -173,6 +174,11 @@ func RequestChainData(gid string) {
 		mysql.CreateChainData(chainData)
 	}
 }
+
+
+
+//baby脚本相关请求----------------------------------------------------------------------------
+
 //ReqBNTxList 访问币安获取交易列表数据
 //https://api.bscscan.com/api?module=account&action=txlist&address=0xE97Fdca0A3Fc76b3046aE496C1502c9d8dFEf6fc&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=DUKNN1QZMITSSZC61YINTD1CWQ92FWEKHM
 func ReqBNTxList(address string,apikey string,sort string,offset string,page string,contain string)  {
@@ -211,30 +217,34 @@ func ReqBNTxList(address string,apikey string,sort string,offset string,page str
 	UnmarshalErr := json.Unmarshal(body,&resp)
 	if UnmarshalErr != nil {
 		logger.Error(UnmarshalErr)
-		return 
+		return
 	}
-	//存一分总的
-	CreateDurableKeyErr := redis.CreateDurableKey("txHashList",string(body))
-	if CreateDurableKeyErr != nil {
-		logger.Error(CreateDurableKeyErr)
-		return 
-	}
-	//筛选买入卖出数据,判断是否包含方法
+
 	for _,v := range resp.Result{
 		if strings.Contains(v.Input,contain){
+			//去重
+			if redis.ExistEle("baby:txSet",v.Hash){
+				continue
+			}
+			//把交易hash存进redis Set中 ，去重使用
+			redis.CreateSetData("baby:txSet",v.Hash)
+			//拆分input数据
+			strInput := []byte(v.Input)
+			tokenID := utils.StringToBigInt(string(strInput[10:74]))
+			price := utils.StringToBigInt(string(strInput[74:138]))
 			//存2 份redis
 			marshaldata, marshalERR := json.Marshal(v)
 			if marshalERR != nil {
 				logger.Error(marshalERR)
 				return
 			}
-			CreateKeyExpireErr := redis.CreateKeyExpire(fmt.Sprintf("txHash:%s",v.Hash),string(marshaldata),0)
+			CreateKeyExpireErr := redis.CreateKeyExpire(fmt.Sprintf("baby:txHash:%s",v.Hash),string(marshaldata),0)
 			if CreateKeyExpireErr != nil {
 				logger.Error(CreateKeyExpireErr)
 				return
 			}
 			//存一份mysql
-			data := model.ChainTxData{
+			data := model.BabyTxData{
 				BlockNumber: v.BlockNumber,
 				TimeStamp: v.TimeStamp,
 				Hash: v.Hash,
@@ -253,6 +263,9 @@ func ReqBNTxList(address string,apikey string,sort string,offset string,page str
 				Confirmations: v.Confirmations,
 				GasUsed: v.GasUsed,
 				CumulativeGasUsed: v.CumulativeGasUsed,
+				//拆分input数据，
+				Token: tokenID.String(),
+				Price: price.String(),
 			}
 			mysql.CreateBNTxHashList(data)
 		}
@@ -282,11 +295,6 @@ func ReqTxDetailByHash(txHash string) *model.RespTxDetails {
 	return &data
 
 }
-//元兽脚本相关请求
-
-//---------------------------------------------------------------------------
-
-//baby脚本相关请求-
 
 //ReqGetTxStatus 请求baby相关交易的hash
 func ReqGetTxStatus(txHash string) *model.RespTxHashStatus {

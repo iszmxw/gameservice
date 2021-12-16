@@ -124,7 +124,6 @@ func CreateDurableKey(key string, value interface{}) error {
 	logger.Info("创建key")
 	logger.Info(key)
 	return nil
-
 }
 
 func GetData(key string) (data string,err error) {

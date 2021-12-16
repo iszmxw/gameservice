@@ -35,12 +35,12 @@ func init() {
 
 func main() {
 	//redis.Close()
-	address := "0x53e562b9b7e5e94b81f10e96ee70ad06df3d2657"
-	apikey := "DUKNN1QZMITSSZC61YINTD1CWQ92FWEKHM"
-	sort := "desc"
-	offset := "10"
-	page := "1"
-	contain := "0x"
+	address := "0x1F6bc601fDe821E0079c89529c79e3C616Da7E22" //市场合约地址
+	apikey := "DUKNN1QZMITSSZC61YINTD1CWQ92FWEKHM" 	//api 请求token
+	sort := "desc" //排序
+	offset := "100" //每次请求数量
+	page := "1"  //页数
+	contain := "0xc37dfc5b"  //0xc37dfc5b 是购买的方法
 	logic.ReqBNTxList(address,apikey,sort,offset,page,contain)
 }
 
