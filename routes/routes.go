@@ -15,6 +15,8 @@ func SetUp() *gin.Engine {
 	//查询，查询redis上的数据，返回给前端
 	//websocket
 	v1 := r.Group("/api/game")
+	baby := r.Group("/api/baby")
+	RegisterWebRoutes(baby)
 	v1.GET("/getAssetsDetailList",controller.GetDataHandle)
 	v1.GET("/getMarketPrice",controller.GetMarketPriceHandle)
 	v1.GET("/getBuyData",controller.GetBuyDataHandle)

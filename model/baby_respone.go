@@ -6,6 +6,10 @@
 
 package model
 
+import (
+	"gorm.io/gorm"
+	"redisData/pkg/helpers"
+)
 
 //baby游戏相关---------------------------------------------------
 
@@ -65,4 +69,20 @@ type RespTxDetails struct {
 		R                string `json:"r"`
 		S                string `json:"s"`
 	} `json:"result"`
+}
+
+// RespBabyOrder 响应买卖数据
+type RespBabyOrder struct {
+	Id          int                `json:"id"`
+	Name        string             `json:"name"`         //名称
+	FixPrice    float64            `json:"fix_price"`    //单价
+	SalePrice   float64            `json:"sale_price"`   //出售价格
+	Profit      float64            `json:"profit"`       //利润
+	Status      int                `json:"status"`       //状态 1.买入
+	TokenId     string             `json:"token_id"`     //token
+	MarketPrice float64            `json:"market_price"` //买入市场价
+	CreatedAt   helpers.TimeNormal `json:"created_at"`
+	UpdatedAt   helpers.TimeNormal `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt     `json:"deleted_at"`
+	Buycount    int                `json:"buyCount"` //购买次数，大于3次，放弃这个单
 }
