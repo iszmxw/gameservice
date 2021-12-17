@@ -60,7 +60,7 @@ func main() {
 				logger.Error(FloatErr)
 				continue
 			}
-			logic.StartBuy(market_price_float,percentFloat)
+			logic.StartSale(market_price_float,percentFloat)
 		}
 		//为1和2设置自动脚本
 		if data1["status"] == "1" && all["Super"] == "2"{
@@ -75,7 +75,7 @@ func main() {
 			if err != nil{
 				logger.Error(err)
 			}
-			logic.StartBuy(marketPriceFloat,percentFloat)
+			logic.StartSale(marketPriceFloat,percentFloat)
 		}
 	}
 }

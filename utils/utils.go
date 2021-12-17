@@ -165,3 +165,34 @@ func StringToBigInt(hex string) *big.Int {
 		return n
 }
 
+// StringToFloat64 string to float64
+func StringToFloat64(str string) float64 {
+	float,err := strconv.ParseFloat(str,64)
+	if err != nil{
+		logger.Error(err)
+	}
+	return float
+}
+
+
+// Float64ToString string to float64
+func Float64ToString(f float64)  string{
+	str := strconv.FormatFloat(f, 'E', -1, 64)
+	return str
+}
+
+
+// StringToInt string to Int
+func StringToInt(str string) int {
+	i, err := strconv.Atoi(str)
+	if err != nil{
+		logger.Error(err)
+	}
+	return i
+}
+
+// IntToString Int to String
+func IntToString(i int) string {
+	str := strconv.Itoa(i)
+	return str
+}

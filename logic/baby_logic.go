@@ -123,6 +123,60 @@ func InitConfig()  {
 	redis.CreatHashKey("baby:ConfigSaleRate", babySaleRate)
 }
 
+//InitConfigTest 初始配置参数,测试使用,设置开关打开，市场百分比为1
+func InitConfigTest()  {
+	//买入参数设置
+	babyBuyConfig := make(map[string]interface{}, 4)
+	babyBuyConfig["percent"] = "1"
+	babyBuyConfig["market_price"] = "10000"
+	babyBuyConfig["status"] = "1" //1.打开 2.关闭
+	babyBuyConfig["types"] = "1"  //买入固定为1
+	redis.CreatHashKey("baby:ConfigBuy", babyBuyConfig)
+
+	//卖出药水参数设置
+	babySaleConfig := make(map[string]interface{}, 4)
+	babySaleConfig["percent"] = "1"
+	babySaleConfig["market_price"] = "10000"
+	babySaleConfig["status"] = "1"
+	babySaleConfig["types"] = "2"	 //买入固定为2
+	redis.CreatHashKey("baby:ConfigSale", babySaleConfig)
+
+	//设置买半自动总开关
+	babyStopAutoBuy := make(map[string]interface{}, 2)
+	babyStopAutoBuy["CrlName"] = "buy"
+	babyStopAutoBuy["Super"] = "1"	//1.为打开 2.为关闭
+	redis.CreatHashKey("baby:ConfigStopAutoBuy", babyStopAutoBuy)
+	//设置卖半自动总开关
+	babyStopAutoSale := make(map[string]interface{}, 2)
+	babyStopAutoSale["CrlName"] = "sale"
+	babyStopAutoSale["Super"] = "1"	//1.为打开 2.为关闭
+	redis.CreatHashKey("baby:ConfigStopAutoSale", babyStopAutoSale)
+
+	//设置药水的风控
+	riskBabyFall:= make(map[string]interface{}, 5)
+	riskBabyFall["OperationType"] = "1"  //1.为停止脚本 2.发送钉钉 3.停止脚本且发送钉钉
+	riskBabyFall["Percentage"] = "2"
+	riskBabyFall["Situation"] = "fall"
+	riskBabyFall["Status"] = "1"	//1.为打开 2.为关闭
+	riskBabyFall["TimeLevel"] = "60"
+	redis.CreatHashKey("baby:ConfigRisk:fall", riskBabyFall)
+	//设置药水的风控
+	riskBabyRise:= make(map[string]interface{}, 5)
+	riskBabyRise["OperationType"] = "1"  //1.为停止脚本 2.发送钉钉 3.停止脚本且发送钉钉
+	riskBabyRise["Percentage"] = "2"
+	riskBabyRise["Situation"] = "rise"
+	riskBabyRise["Status"] = "1"	//1.为打开 2.为关闭
+	riskBabyRise["TimeLevel"] = "60"
+	redis.CreatHashKey("baby:ConfigRisk:rise", riskBabyRise)
+	//设置卖出率参数
+	babySaleRate:= make(map[string]interface{}, 4)
+	babySaleRate["time_level"] = "1"  //1.为停止脚本 2.发送钉钉 3.停止脚本且发送钉钉
+	babySaleRate["percent"] = "2"
+	babySaleRate["status"] = "rise"
+	babySaleRate["operation_type"] = "1"	//1.为打开 2.为关闭
+	redis.CreatHashKey("baby:ConfigSaleRate", babySaleRate)
+}
+
 
 func StartBuy(marketPrice float64,percent float64)  {
 	////获取市场价

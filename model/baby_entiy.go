@@ -11,7 +11,7 @@ import (
 	"redisData/pkg/helpers"
 )
 
-//BabyTxData 链上交易列表
+//BabyTxData 链上交易列表,数据由api返回
 type BabyTxData struct {
 	Id                int64              `json:"id"`
 	BlockNumber       string             `json:"block_number"`
@@ -38,7 +38,6 @@ type BabyTxData struct {
 	UpdatedAt         helpers.TimeNormal `json:"updated_at"`
 	DeletedAt         gorm.DeletedAt
 }
-
 func (BabyTxData) TableName() string {
 	return "baby_tx_data"
 }
@@ -46,8 +45,8 @@ func (BabyTxData) TableName() string {
 //BabyMarketPrice babyMarket的市场数据
 type BabyMarketPrice struct {
 	Id         int
-	MarketName string
-	MarketData float64
+	MarketName string	//市场名字
+	MarketData float64	//市场数据
 	CreatedAt  helpers.TimeNormal
 	UpdatedAt  helpers.TimeNormal
 	DeletedAt  gorm.DeletedAt
